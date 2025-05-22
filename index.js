@@ -1,7 +1,5 @@
 require('dotenv').config();
-const { 
-    Client, 
-    GatewayIntentBits, 
+const {   
     Collection, 
     AttachmentBuilder,
     ActionRowBuilder,
@@ -34,12 +32,12 @@ setTimeout(() => {
 }, 10000);
 
 // Create client instance with required intents
+const { Client, GatewayIntentBits } = require('discord.js');
+
 const client = new Client({
-    intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildVoiceStates,
-    ]
+    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates]
 });
+module.exports = { client };
 
 // Store commands in a collection
 client.commands = new Collection();

@@ -1,10 +1,10 @@
 
 module.exports = {
-    botName: 'Audic',
-    botDescription: 'Your ultimate music bot for seamless audio streaming on Discord.',
+    botName: 'Homey',
+    botDescription: '**Helping your server stay smooth & efficient!**',
     embedColor: '#7289DA',
     supportServer: process.env.SUPPORT_SERVER || 'https://discord.gg/76W85cu3Uy',
-    botLogo: 'https://i.imgur.com/aSN4yCn.png',
+    botLogo: 'https://images-ext-1.discordapp.net/external/C03A2cNehxtq-PM1UFIySYyhr4agUmUG1Hgmb9b2dP8/%3Fsize%3D1024/https/cdn.discordapp.com/avatars/1122035138927284255/6c4e043954064fbe547b0386d02d4157.png?format=webp&quality=lossless&width=930&height=930',
     genius: {
         apiKey: process.env.GENIUS_API_KEY,
         clientToken: process.env.GENIUS_CLIENT_TOKEN,
