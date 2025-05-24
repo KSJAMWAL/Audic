@@ -337,10 +337,12 @@ client.kazagumo.on('playerStart', async (player, track) => {
                         label: 'Timescale',
                         description: 'Custom speed and pitch',
                         value: 'timescale'
-                    }
+                    },
                     {
-                        label: 'Low Pass',
-                        description: 'Reduces high frequencies',
+                        label: 'Slowmode',
+                        description: 'Slows down the playback',
+                        value: 'slowmode'
+                    }
                         value: 'lowpass'
                     },
                     {
@@ -430,16 +432,7 @@ client.kazagumo.on('playerStart', async (player, track) => {
                         description: 'Reduces vocals for karaoke',
                         value: 'karaoke'
                     },
-                    {
-                        label: 'Low Pass',
-                        description: 'Reduces high frequencies',
-                        value: 'lowpass'
-                    },
-                    {
-                        label: 'Slow Mode',
-                        description: 'Slows down the playback',
-                        value: 'slowmode'
-                    }
+                    
                 ]);
 
             const fallbackFilterRow = new ActionRowBuilder()
