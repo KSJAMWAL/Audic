@@ -128,52 +128,37 @@ module.exports = {
                     });
                 }
 
-                // Get selected track
-                const selectedIndex = parseInt(i.values[0]);
-                const selectedTrack = tracks[selectedIndex];
-
                 try {
-                    // Get existing player or create a new one
-                    let player = client.kazagumo.players.get(guildId);
-
-                    if (!player) {
-                        player = await client.kazagumo.createPlayer({
-                            guildId: guildId,
-                            voiceId: member.voice.channel.id,
-                            textId: interaction.channelId,
-                            deaf: true
-                        });
-
-                        // Wait briefly to ensure the player is fully initialized
-                        await new Promise(resolve => setTimeout(resolve, 500));
-                    }
-
-                    // Verify player is properly initialized before accessing queue
-                    if (!player || !player.queue) {
-                        throw new Error('Unable to initialize player. Please try again.');
-                    }
+                    // Get selected track
+                    const selectedTrack = tracks[selectedIndex];
 
                     // Play the selected track
                     player.queue.add(selectedTrack);
-
                     if (!player.playing && !player.paused) {
                         await player.play();
                     }
 
-                    // Create a simple embed for the selected track
+                    // Create embed for successful track add
                     const trackEmbed = createEmbed({
                         title: 'Added to Queue',
                         description: `**[${selectedTrack.title}](${config.supportServer})**`,
                         color: '#f47fff'
                     });
 
-                    const replyContent = {
-                        content: '',
-                        embeds: [trackEmbed],
-                        components: []
-                    };
-
-                    await i.update(replyContent);
+                    try {
+                        await i.update({
+                            content: '',
+                            embeds: [trackEmbed],
+                            components: []
+                        });
+                    } catch (updateError) {
+                        // If interaction update fails, try to send a new message
+                        if (updateError.code === 10062) { // Unknown interaction
+                            await interaction.channel.send({
+                                embeds: [trackEmbed]
+                            });
+                        }
+                    }
                 } catch (error) {
                     console.error('Error playing selected track:', error);
                     await i.update({ 
