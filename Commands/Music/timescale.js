@@ -1,7 +1,7 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { createEmbed, errorEmbed } = require('../utils/embeds');
 const { getFilter, getActiveFilter } = require('../utils/filters');
-const config = require('../config');
+const config = require('../../config');
 
 module.exports = {
     data: new SlashCommandBuilder()
