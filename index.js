@@ -273,8 +273,12 @@ client.kazagumo.on('playerStart', async (player, track) => {
                         .setEmoji(player.paused ? '▶️' : '⏸️')
                         .setStyle(ButtonStyle.Primary),
                     new ButtonBuilder()
-                        .setCustomId('replay')
-                        .setEmoji('🔄')
+                        .setCustomId('stop')
+                        .setEmoji('⏹️')
+                        .setStyle(ButtonStyle.Danger),
+                    new ButtonBuilder()
+                        .setCustomId('loop')
+                        .setEmoji('🔁')
                         .setStyle(ButtonStyle.Secondary),
                     new ButtonBuilder()
                         .setCustomId('skip')
