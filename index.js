@@ -563,7 +563,7 @@ client.kazagumo.on('playerEmpty', async (player) => {
                         const nextTrack = player.queue.tracks[0];
 
                         if (nextTrack) {
-                            const { createEmbed } } = require('./utils/embeds');
+                            const { createEmbed } = require('./utils/embeds');
 
                             // Get track duration for the formatted description
                             const duration = nextTrack.isStream ? 'LIVE' : formatDuration(nextTrack.length);
