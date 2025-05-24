@@ -99,16 +99,7 @@ const loadCommands = (dirPath) => {
 loadCommands(musicCommandsPath);
 loadCommands(generalCommandsPath);
 
-for (const file of commandFiles) {
-    const filePath = path.join(commandsPath, file);
-    const command = require(filePath);
-
-    if ('data' in command && 'execute' in command) {
-        client.commands.set(command.data.name, command);
-    } else {
-        console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
-    }
-}
+// Remove duplicate command loading code since we already have loadCommands function
 
 // Load events
 const eventsPath = path.join(__dirname, 'events');
