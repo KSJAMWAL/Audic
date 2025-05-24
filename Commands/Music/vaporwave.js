@@ -8,13 +8,13 @@ module.exports = {
         .setName('vaporwave')
         .setDescription('Apply vaporwave filter to the music (slowed down with reverb-like effects)'),
     
-    async execute(interaction) {
+    async execute(context) {
         try {
-            const { client } = interaction;
-            const guildId = interaction.guildId;
+            const { client } = context;
+            const guildId = context.guildId;
             
             // Check if the user is in a voice channel
-            const member = interaction.member;
+            const member = context.member;
             const voiceChannel = member.voice.channel;
             
             if (!voiceChannel) {

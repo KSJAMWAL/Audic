@@ -6,7 +6,7 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('help')
         .setDescription('Shows all available commands'),
-    async execute(interaction) {
+    async execute(context) {
         const embed = createEmbed({
             title: 'Available Commands',
             description: 'Here are all the available commands:',
