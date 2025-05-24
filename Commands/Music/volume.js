@@ -13,7 +13,7 @@ module.exports = {
                 .setMinValue(0)
                 .setMaxValue(100)),
     
-    async execute(interaction) {
+    async execute(context) {
         const { client } = interaction;
         const guildId = interaction.guildId;
         const volumeLevel = interaction.options.getInteger('level');

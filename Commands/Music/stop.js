@@ -7,7 +7,7 @@ module.exports = {
         .setName('stop')
         .setDescription('Stop and disconnect'),
     
-    async execute(interaction) {
+    async execute(context) {
         const { client } = interaction;
         const guildId = interaction.guildId;
         

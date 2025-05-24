@@ -8,7 +8,7 @@ module.exports = {
         .setName('resume')
         .setDescription('Resume playback'),
 
-    async execute(interaction) {
+    async execute(context) {
         try {
             const { client } = interaction;
             const guildId = interaction.guildId;

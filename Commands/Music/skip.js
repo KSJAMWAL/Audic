@@ -12,7 +12,7 @@ module.exports = {
                 .setRequired(false)
                 .setMinValue(1)),
     
-    async execute(interaction) {
+    async execute(context) {
         const { client } = interaction;
         const guildId = interaction.guildId;
         const skipAmount = interaction.options.getInteger('amount') || 1;
