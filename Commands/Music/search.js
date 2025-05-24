@@ -129,8 +129,16 @@ module.exports = {
                 }
 
                 try {
-                    // Get selected track
+                    // Get selected track from the interaction value
+                    const selectedIndex = parseInt(i.values[0]);
                     const selectedTrack = tracks[selectedIndex];
+
+                    // Get or create player
+                    const player = client.kazagumo.createPlayer({
+                        guildId: interaction.guildId,
+                        textId: interaction.channelId,
+                        voiceId: member.voice.channelId,
+                    });
 
                     // Play the selected track
                     player.queue.add(selectedTrack);
