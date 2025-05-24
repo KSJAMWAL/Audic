@@ -1,18 +1,19 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { createEmbed } = require('../../utils/embeds');
+const { createEmbed, errorEmbed } = require('../../utils/embeds');
+const config = require('../../config');
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('replay')
         .setDescription('Restart the current track from the beginning'),
-    
+
     async execute(interaction) {
         // Defer reply to prevent timeout
         await interaction.deferReply();
-        
+
         // Get client instance from the interaction
         const client = interaction.client;
-        
+
         // Check if the user is in a voice channel
         if (!interaction.member.voice.channel) {
             return interaction.editReply({
@@ -25,11 +26,11 @@ module.exports = {
                 ]
             });
         }
-        
+
         // Get the guild ID and check if there's a player
         const guildId = interaction.guild.id;
         const player = client.kazagumo.players.get(guildId);
-        
+
         // Check if there's an active player
         if (!player) {
             return interaction.editReply({
@@ -42,7 +43,7 @@ module.exports = {
                 ]
             });
         }
-        
+
         // Check if the user is in the same voice channel as the bot
         if (interaction.member.voice.channel.id !== player.voiceId) {
             return interaction.editReply({
@@ -55,10 +56,10 @@ module.exports = {
                 ]
             });
         }
-        
+
         // Get the current track
         const currentTrack = player.queue.current;
-        
+
         // Check if there's a track to replay
         if (!currentTrack) {
             return interaction.editReply({
@@ -71,11 +72,11 @@ module.exports = {
                 ]
             });
         }
-        
+
         try {
             // Seek to the beginning of the track (position 0)
             await player.seek(0);
-            
+
             // Send a confirmation message with track info
             return interaction.editReply({
                 embeds: [
@@ -89,7 +90,7 @@ module.exports = {
             });
         } catch (error) {
             console.error('Error replaying track:', error);
-            
+
             // Send an error message
             return interaction.editReply({
                 embeds: [
