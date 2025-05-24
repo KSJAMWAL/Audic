@@ -1,59 +1,57 @@
+
 const { REST, Routes } = require('discord.js');
-const { join } = require('path');
-const { readdirSync } = require('fs');
+const fs = require('fs');
+const path = require('path');
 const logger = require('../utils/logger');
 
 module.exports = {
     name: 'ready',
     once: true,
     async execute(client) {
-        try {
-            // Register slash commands
-            const commands = [];
+        const commands = [];
+        
+        // Load commands from both /commands and /Commands directories
+        const commandFolders = ['commands', 'Commands'];
+        
+        for (const folder of commandFolders) {
+            const categoriesPath = path.join(__dirname, '..', folder);
+            if (!fs.existsSync(categoriesPath)) continue;
 
-            // Load commands from both music and general directories
-            const categories = ['music', 'general'];
+            const categories = fs.readdirSync(categoriesPath).filter(file => 
+                fs.statSync(path.join(categoriesPath, file)).isDirectory()
+            );
+
             for (const category of categories) {
-                const commandsPath = join(__dirname, '..', 'commands', category);
-                const commandFiles = readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+                const commandsPath = path.join(categoriesPath, category);
+                const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
                 for (const file of commandFiles) {
-                    const command = require(join(commandsPath, file));
-                    if (command?.data && typeof command.data.toJSON === 'function') {
+                    const filePath = path.join(commandsPath, file);
+                    const command = require(filePath);
+                    if ('data' in command && 'execute' in command) {
                         commands.push(command.data.toJSON());
-                    } else {
-                        logger.error(`Skipping invalid command file: ${file}`);
                     }
                 }
             }
+        }
 
-            const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
+        const rest = new REST().setToken(process.env.DISCORD_TOKEN);
 
+        try {
             logger.system('Command Registration', 'Started refreshing application (/) commands.');
 
-            // Register commands
-            try {
-                await rest.put(
-                    Routes.applicationCommands(process.env.CLIENT_ID),
-                    { body: commands },
-                );
-                
-                // Log the registered commands
-                console.log('Registered commands:', commands.map(cmd => cmd.name).join(', '));
-                
-                logger.system('Command Registration', `Successfully registered ${commands.length} commands!`);
-            } catch (error) {
-                console.error('Error registering commands:', error);
-                logger.error('Command Registration Error', error);
-            }
+            await rest.put(
+                Routes.applicationCommands(process.env.CLIENT_ID),
+                { body: commands },
+            );
 
-            logger.system('Command Registration', 'Successfully registered application commands.');
+            logger.system('Command Registration', `Successfully registered ${commands.length} commands!`);
             logger.system('Bot Status', `Logged in as ${client.user.tag}`);
-            
+
             // Set bot activity
-            client.user.setActivity('/help', { type: 2 }); // 2 = Listening to
+            client.user.setActivity('/help', { type: 2 });
         } catch (error) {
-            logger.error('Error in ready event:', error);
+            logger.error('Command Registration', error);
         }
     },
 };
