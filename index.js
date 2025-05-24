@@ -173,7 +173,7 @@ client.kazagumo.on('playerEnd', async (player) => {
     try {
         // Log the player end event
         logger.player('end', player, player.queue.previous || null, 'Track playback ended');
-        
+
         // Find and edit the now playing message to remove components
         const storedMessage = client.nowPlayingMessages.get(player.guildId);
         if (storedMessage) {
@@ -198,7 +198,7 @@ client.kazagumo.on('playerEnd', async (player) => {
 client.kazagumo.on('playerStart', async (player, track) => {
     // Log track start to webhook instead of console
     logger.player('start', player, track, 'Track playback started');
-    
+
     // Clear any inactivity timeout when playback starts
     if (client.inactivityTimeouts && client.inactivityTimeouts.has(player.guildId)) {
         clearTimeout(client.inactivityTimeouts.get(player.guildId));
@@ -207,38 +207,38 @@ client.kazagumo.on('playerStart', async (player, track) => {
 
     // Set bot activity, but don't show track name (per user request)
     client.user.setActivity('/help', { type: 2 }); // Type 2 is "Listening to"
-    
+
     const channel = client.channels.cache.get(player.textId);
     if (channel) {
         try {
             // Use the music card image for Now Playing
             const { createMusicCard, formatDuration } = require('./utils/formatters');
             const { createEmbed } = require('./utils/embeds');
-            
+
             // Generate music card with track info
             // Create a modified track with zero duration for index.js per user request
             const trackWithZeroDuration = {...track, length: 0};
             const musicCard = await createMusicCard(trackWithZeroDuration, true);
-            
+
             // Prepare message content based on whether we got an image or fallback embed
             let messageContent = {};
-            
+
             if (Buffer.isBuffer(musicCard)) {
                 // For the image buffer, we'll create an attachment using AttachmentBuilder
                 const attachment = new AttachmentBuilder(musicCard, { name: 'nowplaying.png' });
-                
+
                 // Create an embed with the track name and requester and image
                 // Duration set to 0 in index.js per user request
                 const { EmbedBuilder } = require('discord.js');
                 // Get track duration for the formatted description
                 const duration = track.isStream ? 'LIVE' : formatDuration(track.length);
-                
+
                 const nowPlayingEmbed = new EmbedBuilder()
                     .setTitle('Now Playing')
                     .setDescription(`**[${track.title}](${config.supportServer})** • \`${duration}\`\n<@${track.requester.id}>`)
                     .setColor('#87CEEB') // Sky blue to match the card
                     .setImage('attachment://nowplaying.png');
-                
+
                 messageContent = {
                     embeds: [nowPlayingEmbed],
                     files: [attachment]
@@ -352,10 +352,10 @@ client.kazagumo.on('playerStart', async (player, track) => {
         } catch (error) {
             // Silent error handling - create fallback embed
             const { createEmbed } = require('./utils/embeds');
-            
+
             // Get track duration for the formatted description
             const duration = track.isStream ? 'LIVE' : formatDuration(track.length);
-            
+
             const embed = createEmbed({
                 title: `Now Playing`,
                 description: `**[${track.title}](${process.env.SUPPORT_SERVER || 'https://discord.gg/76W85cu3Uy'})** • \`${duration}\``,
@@ -451,10 +451,10 @@ client.kazagumo.on('playerStart', async (player, track) => {
 client.kazagumo.on('playerEmpty', async (player) => {
     // Log the queue empty event
     logger.player('empty', player, null, 'Queue is now empty');
-    
+
     // Reset bot activity when queue is empty
     client.user.setActivity('/help', { type: 2 });
-    
+
     const channel = client.channels.cache.get(player.textId);
     const guildId = player.guildId;
 
@@ -548,24 +548,24 @@ client.kazagumo.on('playerEmpty', async (player) => {
                     try {
                         // Get the next track to play (first in queue)
                         const nextTrack = player.queue.tracks[0];
-                        
+
                         if (nextTrack) {
                             const { createEmbed } = require('./utils/embeds');
-                            
+
                             // Get track duration for the formatted description
                             const duration = nextTrack.isStream ? 'LIVE' : formatDuration(nextTrack.length);
-                            
+
                             // Create a simple embed for autoplay with track name • duration • author format
                             const autoplayEmbed = createEmbed({
                                 title: 'Autoplay Continues',
                                 description: `Added tracks to keep the music going.\n\n**Next:** **[${nextTrack.title}](${config.supportServer})** • \`${duration}\``,
                                 color: '#87CEEB'
                             });
-                            
+
                             const messageContent = {
                                 embeds: [autoplayEmbed]
                             };
-                            
+
                             await channel.send(messageContent);
                         } else {
                             // Fallback if no next track is available
@@ -575,7 +575,7 @@ client.kazagumo.on('playerEmpty', async (player) => {
                                 description: 'Music will continue playing automatically.',
                                 color: '#87CEEB'
                             });
-                            
+
                             await channel.send({ embeds: [autoplayEmbed] });
                         }
                     } catch (error) {
@@ -586,7 +586,7 @@ client.kazagumo.on('playerEmpty', async (player) => {
                             description: 'Music will continue playing automatically.',
                             color: '#87CEEB'
                         });
-                        
+
                         await channel.send({ embeds: [fallbackEmbed] }).catch(() => {});
                     }
                 }
@@ -865,20 +865,20 @@ Here are the main commands you can use:
                 ephemeral: true 
             });
         }
-        
+
         // Music control buttons
         if (['pauseresume', 'skip', 'replay', 'shuffle', 'stop'].includes(interaction.customId)) {
             const guild = interaction.guild;
             const player = client.kazagumo.players.get(guild.id);
             const member = interaction.member;
-            
+
             if (!player) {
                 return interaction.reply({ 
                     content: 'There is no active player in this server!', 
                     ephemeral: true 
                 });
             }
-            
+
             // Check if user is in the same voice channel
             if (!member.voice.channel || member.voice.channel.id !== player.voiceId) {
                 // For all buttons except stop (which has its own validation)
@@ -889,7 +889,7 @@ Here are the main commands you can use:
                     });
                 }
             }
-            
+
             // Handle each button type
             switch (interaction.customId) {
                 case 'pause':
@@ -901,22 +901,22 @@ Here are the main commands you can use:
                             ephemeral: true
                         });
                     }
-                
+
                     // Explicitly pause the music
                     console.log("Pause button clicked, pausing music.");
-                    
+
                     // Set the player state to paused
                     player.pause(true);
-                    
+
                     // Log actual state after update for verification
                     console.log(`Player state after pause: paused=${player.paused}`);
-                    
+
                     // Return appropriate message
                     return interaction.reply({ 
                         content: 'Paused the music! Click Resume to continue playback.', 
                         ephemeral: true 
                     });
-                    
+
                 case 'resume':
                     // Check if user is the requestor for resume button
                     const resumeTrack = player.queue.current;
@@ -926,37 +926,37 @@ Here are the main commands you can use:
                             ephemeral: true
                         });
                     }
-                
+
                     // Explicitly resume the music
                     console.log("Resume button clicked, resuming music.");
-                    
+
                     // Set the player state to not paused (playing)
                     player.pause(false);
-                    
+
                     // Log actual state after update for verification
                     console.log(`Player state after resume: paused=${player.paused}`);
-                    
+
                     // Return appropriate message
                     return interaction.reply({ 
                         content: 'Resumed the music! Click Pause to pause playback.', 
                         ephemeral: true 
                     });
-                    
+
                 // Keep backward compatibility with old 'pauseresume' button for a while
                 case 'pauseresume':
                     // Simple toggle approach
                     const isPaused = player.paused;
                     player.pause(!isPaused);
-                    
+
                     console.log(`Legacy pauseresume button used. Was paused: ${isPaused}, Now paused: ${player.paused}`);
-                    
+
                     return interaction.reply({ 
                         content: player.paused ? 
                             'Paused the music! Use the Resume button to continue.' : 
                             'Resumed the music! Use the Pause button to pause again.', 
                         ephemeral: true 
                     });
-                    
+
                 case 'skip':
                     // Check if user is the requestor for skip button
                     const skipTrack = player.queue.current;
@@ -966,13 +966,13 @@ Here are the main commands you can use:
                             ephemeral: true
                         });
                     }
-                    
+
                     player.skip();
                     return interaction.reply({ 
                         content: 'Skipped to the next track!', 
                         ephemeral: true 
                     });
-                    
+
                 case 'replay':
                     // Stop the current track and restart it
                     const currentTrack = player.queue.current;
@@ -982,7 +982,7 @@ Here are the main commands you can use:
                             ephemeral: true 
                         });
                     }
-                    
+
                     // Check if user is the requestor for replay button
                     if (currentTrack.requester.id !== interaction.user.id) {
                         return interaction.reply({
@@ -990,19 +990,19 @@ Here are the main commands you can use:
                             ephemeral: true
                         });
                     }
-                    
+
                     // Stop the player and restart the same track
                     await player.seek(0);
                     await player.pause(true); // Pause first
                     setTimeout(() => {
                         player.pause(false); // Resume after a short delay
                     }, 500);
-                    
+
                     return interaction.reply({ 
                         content: 'Stopped and restarted the current track!', 
                         ephemeral: true 
                     });
-                    
+
                 case 'shuffle':
                     // Get current track
                     const currentSong = player.queue.current;
@@ -1012,7 +1012,7 @@ Here are the main commands you can use:
                             ephemeral: true 
                         });
                     }
-                    
+
                     // Check if user is the requestor for shuffle button
                     if (currentSong.requester.id !== interaction.user.id) {
                         return interaction.reply({
@@ -1020,7 +1020,7 @@ Here are the main commands you can use:
                             ephemeral: true
                         });
                     }
-                    
+
                     // Even if there are no additional tracks, we'll just give a specific message
                     if (player.queue.length === 0) {
                         return interaction.reply({ 
@@ -1028,31 +1028,31 @@ Here are the main commands you can use:
                             ephemeral: true 
                         });
                     }
-                    
+
                     try {
                         // First shuffle the upcoming tracks
                         player.queue.shuffle();
-                        
+
                         // Create an array with current song and all other tracks
                         const tracksToShuffle = [currentSong, ...player.queue.tracks];
-                        
+
                         // Shuffle all tracks including current
                         for (let i = tracksToShuffle.length - 1; i > 0; i--) {
                             const j = Math.floor(Math.random() * (i + 1));
                             [tracksToShuffle[i], tracksToShuffle[j]] = [tracksToShuffle[j], tracksToShuffle[i]];
                         }
-                        
+
                         // Clear the queue and add all shuffled tracks except the first one
                         player.queue.clear();
                         player.queue.add(tracksToShuffle.slice(1)); // Add all except first
-                        
+
                         // Only skip if the first track is different from current
                         if (tracksToShuffle[0].uri !== currentSong.uri) {
                             // Add the first shuffled track to the beginning of the queue and skip
                             player.queue.add(tracksToShuffle[0], 0); // Insert at position 0
                             player.skip();
                         }
-                        
+
                         return interaction.reply({ 
                             content: 'Shuffled all tracks including the current one!', 
                             ephemeral: true 
@@ -1066,7 +1066,7 @@ Here are the main commands you can use:
                         });
                     }
                     break;
-                    
+
                 case 'stop':
                     // Get current track to check requestor
                     const trackToStop = player.queue.current;
@@ -1088,7 +1088,7 @@ Here are the main commands you can use:
                     try {
                         // Track if we've already shown the queue end message
                         let queueEndMessageShown = false;
-                        
+
                         // Send queue end message before destroying
                         try {
                             const channel = client.channels.cache.get(player.textId);
@@ -1112,7 +1112,7 @@ Here are the main commands you can use:
                                 console.log("Executing player.destroy()");
                                 // Let's use a custom approach to destroy
                                 await player.queue.clear(); // First clear the queue
-                                
+
                                 if (player.node && player.node.send) {
                                     // Attempt to send a stop instruction to the node
                                     try {
@@ -1125,7 +1125,7 @@ Here are the main commands you can use:
                                         console.log('Could not send stop signal:', stopError.message);
                                     }
                                 }
-                                
+
                                 // DO NOT directly call player.destroy() as it may cause race conditions
                                 // Instead, let's just clear the queue and disconnect
                                 try {
@@ -1147,7 +1147,7 @@ Here are the main commands you can use:
                         } else {
                             console.log("Player already destroyed or doesn't exist");
                         }
-                        
+
                         // Always respond to the interaction
                         return interaction.reply({
                             content: `Music playback has been stopped and the queue has been cleared.`,
@@ -1178,7 +1178,7 @@ Here are the main commands you can use:
                     ephemeral: true 
                 });
             }
-            
+
             // Check if user is in the same voice channel
             if (!member.voice.channel || member.voice.channel.id !== player.voiceId) {
                 return interaction.reply({ 
@@ -1186,7 +1186,7 @@ Here are the main commands you can use:
                     ephemeral: true 
                 });
             }
-            
+
             // Check if user is the requestor for filter controls
             const currentTrack = player.queue.current;
             if (currentTrack && currentTrack.requester.id !== interaction.user.id) {
@@ -1249,7 +1249,7 @@ client.login(process.env.DISCORD_TOKEN)
     .then(() => {
         clearTimeout(loginTimeout); // Clear the timeout if login succeeds
         console.log('Successfully logged in to Discord!');
-        
+
         // Log successful bot startup to webhook
         logger.system('Bot Startup', `Bot successfully started and logged in as ${client.user.tag}`, [
             { name: 'Guilds', value: `${client.guilds.cache.size}`, inline: true },
@@ -1267,7 +1267,6 @@ client.login(process.env.DISCORD_TOKEN)
             errorDetails = 'DISCORD_TOKEN is invalid. Please check your environment variables.';
             console.error(errorDetails);
         } else if (error.message.includes('network') || error.message.includes('connect')) {
-            errorDetails = 'Network error. Please check your internet connection.';
             console.error(errorDetails);
         } else {
             errorDetails = 'Unknown error occurred during login. Please try again later.';

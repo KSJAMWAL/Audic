@@ -1,60 +1,62 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { createEmbed, errorEmbed } = require('../utils/embeds');
-const config = require('../config');
+const logger = require('../utils/logger');
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('pause')
         .setDescription('Pause or resume current playback'),
-    
+
     async execute(interaction) {
-        const { client } = interaction;
-        const guildId = interaction.guildId;
-        
-        // Check if the user is in a voice channel
-        const member = interaction.member;
-        const voiceChannel = member.voice.channel;
-        
-        if (!voiceChannel) {
-            return interaction.reply({ embeds: [errorEmbed('You need to be in a voice channel to use this command!')], ephemeral: true });
-        }
-        
-        // Get the player for this guild
-        const player = client.kazagumo.players.get(guildId);
-        
-        if (!player) {
-            return interaction.reply({ embeds: [errorEmbed('There is no active player in this server!')], ephemeral: true });
-        }
-        
-        // Check if the user is in the same voice channel as the bot
-        if (player.voiceId !== voiceChannel.id) {
-            return interaction.reply({ embeds: [errorEmbed('You need to be in the same voice channel as me!')], ephemeral: true });
-        }
-        
-        if (player.paused) {
-            // Resume the player if it's already paused
-            await player.pause(false);
-            
-            const resumeEmbed = createEmbed({
-                title: `Playback Resumed`,
-                description: 'The current playback has been resumed.',
-                footer: `Requested by ${interaction.user.tag}`,
-                timestamp: true
+        try {
+            const { client } = interaction;
+            const guildId = interaction.guildId;
+            const member = interaction.member;
+            const voiceChannel = member.voice?.channel;
+
+            if (!voiceChannel) {
+                return interaction.reply({ 
+                    embeds: [errorEmbed('❌ You need to be in a voice channel to use this command!')], 
+                    ephemeral: true 
+                }).catch(console.error);
+            }
+
+            const player = client.kazagumo.players.get(guildId);
+
+            if (!player) {
+                return interaction.reply({ 
+                    embeds: [errorEmbed('❌ There is no active player in this server!')], 
+                    ephemeral: true 
+                }).catch(console.error);
+            }
+
+            if (player.voiceId !== voiceChannel.id) {
+                return interaction.reply({ 
+                    embeds: [errorEmbed('❌ You must be in the same voice channel as the bot!')], 
+                    ephemeral: true 
+                }).catch(console.error);
+            }
+
+            const pausedState = player.paused;
+
+            await player.pause(!pausedState);
+
+            const statusEmbed = createEmbed({
+                title: pausedState ? '▶ Playback Resumed' : '⏸️ Playback Paused',
+                description: pausedState
+                    ? 'The current playback has been resumed.'
+                    : 'The current playback has been paused. Use `/pause` again to resume.',
+                footer: { text: `Requested by ${interaction.user.tag}` },
+                timestamp: new Date()
             });
-            
-            await interaction.reply({ embeds: [resumeEmbed] });
-        } else {
-            // Pause the player
-            await player.pause(true);
-            
-            const pauseEmbed = createEmbed({
-                title: `Playback Paused`,
-                description: 'The current playback has been paused. Use `/pause` again to resume.',
-                footer: `Requested by ${interaction.user.tag}`,
-                timestamp: true
-            });
-            
-            await interaction.reply({ embeds: [pauseEmbed] });
+
+            await interaction.reply({ embeds: [statusEmbed] }).catch(console.error);
+        } catch (error) {
+            logger.error("Error in /pause command:", error);
+            await interaction.reply({ 
+                embeds: [errorEmbed('❌ An unexpected error occurred while pausing/resuming playback.')], 
+                ephemeral: true 
+            }).catch(() => {});
         }
     },
 };

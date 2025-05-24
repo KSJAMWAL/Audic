@@ -16,6 +16,8 @@
     "genius-lyrics": "^4.4.7",
     "kazagumo": "^3.2.2",
     "node-fetch": "^3.3.2",
-    "shoukaku": "^4.1.1"
+    "shoukaku": "^4.1.1",
+    "undici": "^7.10.0",
+    "ws": "^8.18.2"
   }
 }

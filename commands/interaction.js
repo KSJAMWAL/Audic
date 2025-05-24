@@ -16,8 +16,9 @@ const botLogo = 'https://images-ext-1.discordapp.net/external/C03A2cNehxtq-PM1UF
 client.on('interactionCreate', async interaction => {
     if (!interaction.isButton()) return;
 
-    // Safely get server icon, fallback to bot logo if null (for DMs)
+    // Safely get server details, fallback to bot logo if null (for DMs)
     const serverIcon = interaction.guild?.iconURL({ dynamic: true, size: 1024 }) || botLogo;
+    const serverName = interaction.guild?.name || "Direct Message";
     const userIcon = interaction.user.displayAvatarURL({ dynamic: true, size: 1024 });
 
     const commandCategories = {
@@ -72,10 +73,10 @@ client.on('interactionCreate', async interaction => {
             .setTitle(`${labelName}`)
             .setDescription(`**Helping your server stay smooth & efficient!**`)
             .setColor('#00FFFF')
-            .setThumbnail(serverIcon) // Server icon (fallback to bot logo if null)
-            .setAuthor({ name: 'HOMEY', iconURL: botLogo }) // Adds bot name & logo
-            .addFields({ name: '', value: commandCategories[interaction.customId].join('\n') })
-            .setFooter({ text: 'Use /help anytime to see this menu again!', iconURL: userIcon }); // Adds user avatar to footer
+            .setThumbnail(botLogo)
+            .setAuthor({ name: serverName, iconURL: serverIcon }) // Fixed issue with undefined server name
+            .addFields({ name: 'Commands', value: commandCategories[interaction.customId].join('\n') }) // Added proper field name
+            .setFooter({ text: 'Use /help anytime to see this menu again!', iconURL: userIcon });
 
         await interaction.reply({ embeds: [embed], ephemeral: true });
     } else {
