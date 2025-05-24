@@ -7,15 +7,15 @@ module.exports = {
         .setName('pause')
         .setDescription('Pause or resume current playback'),
 
-    async execute(interaction) {
+    async execute(context) {
         try {
-            const { client } = interaction;
-            const guildId = interaction.guildId;
-            const member = interaction.member;
+            const { client } = context;
+            const guildId = context.guildId;
+            const member = context.member;
             const voiceChannel = member.voice?.channel;
 
             if (!voiceChannel) {
-                return interaction.reply({ 
+                return context.reply({ 
                     embeds: [errorEmbed('❌ You need to be in a voice channel to use this command!')], 
                     ephemeral: true 
                 }).catch(console.error);
@@ -24,14 +24,14 @@ module.exports = {
             const player = client.kazagumo.players.get(guildId);
 
             if (!player) {
-                return interaction.reply({ 
+                return context.reply({ 
                     embeds: [errorEmbed('❌ There is no active player in this server!')], 
                     ephemeral: true 
                 }).catch(console.error);
             }
 
             if (player.voiceId !== voiceChannel.id) {
-                return interaction.reply({ 
+                return context.reply({ 
                     embeds: [errorEmbed('❌ You must be in the same voice channel as the bot!')], 
                     ephemeral: true 
                 }).catch(console.error);
@@ -46,14 +46,14 @@ module.exports = {
                 description: pausedState
                     ? 'The current playback has been resumed.'
                     : 'The current playback has been paused. Use `/pause` again to resume.',
-                footer: { text: `Requested by ${interaction.user.tag}` },
+                footer: { text: `Requested by ${context.user.tag}` },
                 timestamp: new Date()
             });
 
-            await interaction.reply({ embeds: [statusEmbed] }).catch(console.error);
+            await context.reply({ embeds: [statusEmbed] }).catch(console.error);
         } catch (error) {
             logger.error("Error in /pause command:", error);
-            await interaction.reply({ 
+            await context.reply({ 
                 embeds: [errorEmbed('❌ An unexpected error occurred while pausing/resuming playback.')], 
                 ephemeral: true 
             }).catch(() => {});
