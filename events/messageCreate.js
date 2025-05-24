@@ -7,10 +7,13 @@ module.exports = {
     async execute(message) {
         const { client } = message;
 
-        // Handle prefix commands
+        // Ignore messages from bots
         if (message.author.bot) return;
 
-        // Check if message is just a bot mention
+        // Get prefix from config
+        const prefix = config.prefix;
+
+        // Check if message starts with prefix or is a bot mention
         if (message.content.trim() === `<@${client.user.id}>` || message.content.trim() === `<@!${client.user.id}>`) {
             const embed = createEmbed({
                 title: `${config.botName} - Music Bot`,
