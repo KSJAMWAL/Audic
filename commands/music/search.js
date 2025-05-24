@@ -1,6 +1,6 @@
 const { SlashCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder, ComponentType } = require('discord.js');
-const { createEmbed, errorEmbed } = require('../utils/embeds');
-const { formatDuration, createMusicCard } = require('../utils/formatters');
+const { createEmbed, errorEmbed } = require('../../utils/embeds');
+const { formatDuration, createMusicCard } = require('../../utils/formatters');
 const config = require('../config');
 
 module.exports = {
