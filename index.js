@@ -15,6 +15,8 @@ const config = require('./config');
 const { formatDuration } = require('./utils/formatters');
 const { createEmbed } = require('./utils/embeds');
 const logger = require('./utils/logger');
+const { autoplayCommand } = require('./Commands/Settings/autoplay');
+const { twentyFourSevenCommand } = require('./Commands/Settings/247');
 
 console.clear(); // Clear previous console output
 
