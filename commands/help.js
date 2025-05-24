@@ -30,25 +30,21 @@ module.exports = {
             const musicButton = new ButtonBuilder()
                 .setCustomId('music_commands')
                 .setEmoji('<:kuchbhi:1374968363641470987>')
-                .setLabel('Music')
                 .setStyle(ButtonStyle.Primary);
 
             const filtersButton = new ButtonBuilder()
                 .setCustomId('filter_commands')
                 .setEmoji('<:filter:1374983289424707625>')
-                .setLabel('Filters')
                 .setStyle(ButtonStyle.Secondary);
 
             const utilityButton = new ButtonBuilder()
                 .setCustomId('utility_commands')
                 .setEmoji('<:setting:1374968782619152504>')
-                .setLabel('Utility')
                 .setStyle(ButtonStyle.Success);
 
             const supportButton = new ButtonBuilder()
                 .setCustomId('support_server')
                 .setEmoji('<:Support:1374983689984806923>')
-                .setLabel('Support')
                 .setStyle(ButtonStyle.Success);
 
             // Create an action row with the buttons
@@ -63,10 +59,10 @@ module.exports = {
                 .setThumbnail(botAvatar) // Using bot's avatar dynamically
                 .setAuthor({ name: serverTitle, iconURL: serverPic }) // Using server's name/icon dynamically
                 .addFields(
-                    { name: '\n\n<:kuchbhi:1374968363641470987> - Music Commands', value: 'Access all music-related commands.\n', inline: false },
-                    { name: '<:filter:1374983289424707625> - Filters Commands', value: 'Apply audio filters.\n', inline: false },
-                    { name: '<:setting:1374968782619152504> - Utility Commands', value: 'Useful server management tools.\n', inline: false },
-                    { name: '<:Support:1374983689984806923> - Support', value: 'Get help or join our support server.\n', inline: false }
+                    { name: '\n\n<:kuchbhi:1374968363641470987> - Music Commands', value: 'Music at your fingertips—just a command away!', inline: false },
+                    { name: '<:filter:1374983289424707625> - Filters Commands', value: 'Fine-tune your sound, perfect your vibe!', inline: false },
+                    { name: '<:setting:1374968782619152504> - Utility Commands', value: 'Smart solutions for smarter servers!', inline: false },
+                    { name: '<:Support:1374983689984806923> - Support', value: 'Support made simple, solutions made easy!', inline: false }
                 )
                 .setFooter({ text: 'Use /help anytime to see this menu again!', iconURL: userPic }); // Using user's avatar dynamically
 
