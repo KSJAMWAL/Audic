@@ -561,7 +561,7 @@ client.kazagumo.on('playerEmpty', async (player) => {
                         const nextTrack = player.queue.tracks[0];
 
                         if (nextTrack) {
-                            const { createEmbed } = require('./utils/embeds');
+                            const { createEmbed } } = require('./utils/embeds');
 
                             // Get track duration for the formatted description
                             const duration = nextTrack.isStream ? 'LIVE' : formatDuration(nextTrack.length);
@@ -1183,6 +1183,31 @@ Here are the main commands you can use:
                         console.error("Error in stop button:", error);
                         return interaction.reply({
                             content: `Music playback has been stopped.`,
+                            ephemeral: true
+                        });
+                    }
+
+                case 'previous':
+                    try {
+                        // Get previous track from queue history if available
+                        if (player.queue.previous && player.queue.previous.length > 0) {
+                            const previousTrack = player.queue.previous[player.queue.previous.length - 1];
+                            player.queue.unshift(previousTrack);
+                            player.skip();
+                            return interaction.reply({
+                                content: 'Playing previous track!',
+                                ephemeral: true
+                            });
+                        } else {
+                            return interaction.reply({
+                                content: 'No previous track available!',
+                                ephemeral: true
+                            });
+                        }
+                    } catch (error) {
+                        console.error("Error in previous button:", error);
+                        return interaction.reply({
+                            content: 'Failed to play previous track.',
                             ephemeral: true
                         });
                     }
