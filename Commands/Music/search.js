@@ -12,7 +12,7 @@ module.exports = {
                 .setDescription('The song to search for')
                 .setRequired(true)),
 
-    async execute(context) {
+    async execute(interaction) {
         const { client, member } = interaction;
         const guildId = interaction.guildId;
         const query = interaction.options.getString('query');
