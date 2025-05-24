@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { createEmbed, errorEmbed } = require('../utils/embeds');
+const { createEmbed, errorEmbed } = require('../../utils/embeds');
 const config = require('../../config');
 
 module.exports = {
@@ -12,7 +12,7 @@ module.exports = {
                 .setRequired(false)
                 .setMinValue(1)),
     
-    async execute(context) {
+    async execute(interaction) {
         const { client } = interaction;
         const guildId = interaction.guildId;
         const skipAmount = interaction.options.getInteger('amount') || 1;
