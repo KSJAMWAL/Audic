@@ -434,15 +434,15 @@ client.kazagumo.on('playerStart', async (player, track) => {
                 .addComponents(
                     new ButtonBuilder()
                         .setCustomId('pauseresume')
-                        .setEmoji(player.paused ? '▶️' : '⏸️')
+                        .setEmoji('<:Pause:1375948983394111488>')
                         .setStyle(ButtonStyle.Primary),
                     new ButtonBuilder()
-                        .setCustomId('skip')
-                        .setEmoji('⏭️')
-                        .setStyle(ButtonStyle.Secondary),
+                        .setCustomId('stop')
+                        .setEmoji('<:Stop:1375949001148596324>')
+                        .setStyle(ButtonStyle.Danger),
                     new ButtonBuilder()
-                        .setCustomId('shuffle')
-                        .setEmoji('🔀')
+                        .setCustomId('skip')
+                        .setEmoji('<:skip:1375948967665467476>')
                         .setStyle(ButtonStyle.Secondary)
                 );
 
@@ -956,66 +956,107 @@ Here are the main commands you can use:
                     });
 
                 // Keep backward compatibility with old 'pauseresume' button for a while
-                case 'pauseresume':
-                    const isPaused = player.paused;
-                    // Update the button with new emoji
-                    const updatedRow = new ActionRowBuilder()
-                        .addComponents(
-                            new ButtonBuilder()
-                                .setCustomId('pauseresume')
-                                .setEmoji(!isPaused ? '▶️' : '⏸️')
-                                .setStyle(ButtonStyle.Primary),
-                            new ButtonBuilder()
-                                .setCustomId('replay')
-                                .setEmoji('🔄')
-                                .setStyle(ButtonStyle.Secondary),
-                            new ButtonBuilder()
-                                .setCustomId('skip')
-                                .setEmoji('⏭️')
-                                .setStyle(ButtonStyle.Secondary)
-                        );
-                    player.pause(!isPaused);
+                const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 
-                    console.log(`Legacy pauseresume button used. Was paused: ${isPaused}, Now paused: ${player.paused}`);
+                switch (interaction.customId) {
+                        case 'pauseresume': {
+                            const isPaused = player.paused;
 
-                    return interaction.reply({ 
-                        content: player.paused ? 
-                            'Paused the music! Use the Resume button to continue.' : 
-                            'Resumed the music! Use the Pause button to pause again.', 
-                        ephemeral: true 
-                    });
+                            // Toggle the pause state
+                            player.pause(!isPaused);
 
-                case 'skip':
-                    // Check if user is the requestor for skip button
-                    const skipTrack = player.queue.current;
-                    if (skipTrack && skipTrack.requester.id !== interaction.user.id) {
+                            console.log(`Pause/Resume button clicked. Previous state: ${isPaused}, New state: ${player.paused}`);
+
+                            // Updated button row dynamically reflecting current pause state
+                            const updatedRow = new ActionRowBuilder().addComponents(
+                                new ButtonBuilder()
+                                    .setCustomId('pauseresume')
+                                    .setEmoji(!isPaused ? '⏸️' : '▶️') // Toggle between Play and Pause
+                                    .setLabel(!isPaused ? 'Pause' : 'Resume') // Change label dynamically
+                                    .setStyle(ButtonStyle.Primary),
+                                new ButtonBuilder()
+                                    .setCustomId('replay')
+                                    .setEmoji('🔄')
+                                    .setLabel('Replay')
+                                    .setStyle(ButtonStyle.Secondary),
+                                new ButtonBuilder()
+                                    .setCustomId('skip')
+                                    .setEmoji('⏭️')
+                                    .setLabel('Skip')
+                                    .setStyle(ButtonStyle.Secondary)
+                            );
+
+                            // Use `deferUpdate()` for immediate button interaction response
+                            await interaction.deferUpdate();
+                            return await interaction.editReply({
+                                content: player.paused ? 'Paused the music! Click Resume to continue.' : 'Resumed the music! Click Pause to stop.',
+                                components: [updatedRow]
+                            });
+                        }
+
                         return interaction.reply({
-                            content: 'You cannot use this button! Only the person who requested this song can control it.',
+                            content: player.paused 
+                                ? 'Paused the music! Click Resume to continue.' 
+                                : 'Resumed the music! Click Pause to stop.',
+                            components: [updatedRow],
+                            ephemeral: false
+                        });
+
+                    case 'skip':
+                        // Ensure there is a current track
+                        const skipTrack = player.queue.current;
+                        if (!skipTrack) {
+                            return interaction.reply({
+                                content: 'No track is currently playing to skip!',
+                                ephemeral: false
+                            });
+                        }
+
+                        // Only allow the requester to skip
+                        if (skipTrack.requester.id !== interaction.user.id) {
+                            return interaction.reply({
+                                content: 'You cannot skip this track! Only the person who requested it can control playback.',
+                                ephemeral: false
+                            });
+                        }
+
+                        player.skip();
+
+                        return interaction.reply({
+                            content: 'Skipped to the next track!',
+                            ephemeral: false
+                        });
+
+                    case 'replay':
+                        // Ensure there is a current track
+                        const currentTrack = player.queue.current;
+                        if (!currentTrack) {
+                            return interaction.reply({
+                                content: 'No track is currently playing to replay!',
+                                ephemeral: false
+                            });
+                        }
+
+                        // Restart the current track
+                        player.stop();
+
+                        return interaction.reply({
+                            content: `Replaying: **${currentTrack.title}**!`,
+                            ephemeral: false
+                        });
+
+                    default:
+                        return interaction.reply({
+                            content: 'Unknown button action!',
                             ephemeral: true
                         });
-                    }
-
-                    player.skip();
-                    return interaction.reply({ 
-                        content: 'Skipped to the next track!', 
-                        ephemeral: true 
-                    });
-
-                case 'replay':
-                    // Stop the current track and restart it
-                    const currentTrack = player.queue.current;
-                    if (!currentTrack) {
-                        return interaction.reply({ 
-                            content: 'No track is currently playing!', 
-                            ephemeral: true 
-                        });
-                    }
+                }
 
                     // Check if user is the requestor for replay button
                     if (currentTrack.requester.id !== interaction.user.id) {
                         return interaction.reply({
                             content: 'You cannot use this button! Only the person who requested this song can control it.',
-                            ephemeral: true
+                            ephemeral: false
                         });
                     }
 
@@ -1028,7 +1069,7 @@ Here are the main commands you can use:
 
                     return interaction.reply({ 
                         content: 'Stopped and restarted the current track!', 
-                        ephemeral: true 
+                        ephemeral: false 
                     });
 
                 case 'shuffle':
@@ -1037,7 +1078,7 @@ Here are the main commands you can use:
                     if (!currentSong) {
                         return interaction.reply({ 
                             content: 'No track is currently playing!', 
-                            ephemeral: true 
+                            ephemeral: false 
                         });
                     }
 
@@ -1045,7 +1086,7 @@ Here are the main commands you can use:
                     if (currentSong.requester.id !== interaction.user.id) {
                         return interaction.reply({
                             content: 'You cannot use this button! Only the person who requested this song can control it.',
-                            ephemeral: true
+                            ephemeral: false
                         });
                     }
 
@@ -1053,7 +1094,7 @@ Here are the main commands you can use:
                     if (player.queue.length === 0) {
                         return interaction.reply({ 
                             content: 'No additional tracks in queue. Add more songs to create a shuffle mix!', 
-                            ephemeral: true 
+                            ephemeral: false 
                         });
                     }
 
@@ -1083,14 +1124,14 @@ Here are the main commands you can use:
 
                         return interaction.reply({ 
                             content: 'Shuffled all tracks including the current one!', 
-                            ephemeral: true 
+                            ephemeral: false 
                         });
                     } catch (error) {
                         console.error("Error during shuffle:", error);
                         // If shuffle fails, send an error message
                         return interaction.reply({ 
                             content: 'Failed to shuffle the queue. Please try again.',
-                            ephemeral: true 
+                            ephemeral: false 
                         });
                     }
                     break;
@@ -1101,7 +1142,7 @@ Here are the main commands you can use:
                     if (!trackToStop) {
                         return interaction.reply({
                             content: 'No track is currently playing!',
-                            ephemeral: true
+                            ephemeral: false
                         });
                     }
 
@@ -1109,7 +1150,7 @@ Here are the main commands you can use:
                     if (trackToStop.requester.id !== interaction.user.id) {
                         return interaction.reply({
                             content: 'You cannot use this button! Only the person who requested this song can stop it.',
-                            ephemeral: true
+                            ephemeral: false
                         });
                     }
 
