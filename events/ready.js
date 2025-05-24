@@ -10,12 +10,9 @@ module.exports = {
     async execute(client) {
         const commands = [];
         
-        // Load commands from both /commands and /Commands directories
-        const commandFolders = ['commands', 'Commands'];
-        
-        for (const folder of commandFolders) {
-            const categoriesPath = path.join(__dirname, '..', folder);
-            if (!fs.existsSync(categoriesPath)) continue;
+        // Load commands from Commands directory only
+        const categoriesPath = path.join(__dirname, '..', 'Commands');
+        if (fs.existsSync(categoriesPath)) {
 
             const categories = fs.readdirSync(categoriesPath).filter(file => 
                 fs.statSync(path.join(categoriesPath, file)).isDirectory()

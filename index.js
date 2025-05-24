@@ -76,28 +76,32 @@ client.kazagumo = new Kazagumo({
     ]
 }, new Connectors.DiscordJS(client), config.lavalink.nodes);
 
-// Load commands
-// Load commands from both music and general directories
-const musicCommandsPath = path.join(__dirname, 'commands', 'music');
-const generalCommandsPath = path.join(__dirname, 'commands', 'general');
+// Load commands from Commands directory
+const loadCommands = () => {
+    const commandsPath = path.join(__dirname, 'Commands');
+    const categories = fs.readdirSync(commandsPath).filter(file => 
+        fs.statSync(path.join(commandsPath, file)).isDirectory()
+    );
 
-const loadCommands = (dirPath) => {
-    const files = fs.readdirSync(dirPath).filter(file => file.endsWith('.js'));
-    for (const file of files) {
-        const filePath = path.join(dirPath, file);
-        const command = require(filePath);
+    for (const category of categories) {
+        const categoryPath = path.join(commandsPath, category);
+        const commandFiles = fs.readdirSync(categoryPath).filter(file => file.endsWith('.js'));
         
-        if ('data' in command && 'execute' in command) {
-            client.commands.set(command.data.name, command);
-            console.log(`Loaded command: ${command.data.name}`);
-        } else {
-            console.log(`[WARNING] The command at ${filePath} is missing required properties`);
+        for (const file of commandFiles) {
+            const filePath = path.join(categoryPath, file);
+            const command = require(filePath);
+            
+            if ('data' in command && 'execute' in command) {
+                client.commands.set(command.data.name, command);
+                console.log(`Loaded command: ${command.data.name}`);
+            } else {
+                console.log(`[WARNING] The command at ${filePath} is missing required properties`);
+            }
         }
     }
 };
 
-loadCommands(musicCommandsPath);
-loadCommands(generalCommandsPath);
+loadCommands();
 
 // Remove duplicate command loading code since we already have loadCommands function
 
