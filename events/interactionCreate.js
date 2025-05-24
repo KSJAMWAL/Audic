@@ -8,7 +8,7 @@ function createVolumeBar(volume) {
     const maxBars = 10;
     const filledBars = Math.round((volume / 100) * maxBars);
     const emptyBars = maxBars - filledBars;
-    
+
     return '▓'.repeat(filledBars) + '░'.repeat(emptyBars);
 }
 
@@ -20,7 +20,7 @@ async function safeReply(interaction, options) {
             options.flags = { ephemeral: true };
             delete options.ephemeral;
         }
-        
+
         // Only attempt to reply if the interaction hasn't been replied to
         if (interaction.replied || interaction.deferred) {
             return await interaction.followUp(options).catch(() => null);
@@ -57,7 +57,7 @@ module.exports = {
                     }).join(', ');
                 }
                 logger.command(interaction, interaction.commandName, commandArgs);
-                
+
                 // Execute the command
                 await command.execute(interaction);
             } catch (error) {
@@ -74,11 +74,11 @@ module.exports = {
                 } catch (logError) {
                     // Silent error handling for logger
                 }
-                
+
                 // Only handle the error if the interaction is still valid and hasn't timed out
                 try {
                     const errorMessage = 'There was an error while executing this command!';
-                    
+
                     // Try to reply depending on the current interaction state
                     if (interaction.replied) {
                         await interaction.followUp({ 
@@ -101,587 +101,75 @@ module.exports = {
                 }
             }
         }
-        
+
         // Re-enabled button interactions in this file
         // since they're not fully implemented in index.js
         if (interaction.isButton()) {
-            // Log button interaction
-            try {
-                logger.command(interaction, `Button: ${interaction.customId}`, '');
-            } catch (error) {
-                // Silent error for logger
-            }
-            
-            // Handle button interactions silently
             const { client, guild } = interaction;
             const player = client.kazagumo.players.get(guild.id);
-            
-            if (!player) {
-                // Handle special case for buttons that don't need an active player
-                if (interaction.customId === 'play' || interaction.customId === 'help' || interaction.customId === '247toggle' || interaction.customId === 'leave') {
-                    // These buttons will be handled in their respective switch cases
-                } else {
-                    // Use safeReply for safer interaction handling
-                    await safeReply(interaction, { 
-                        content: 'No active player found! Start playback with the /play command.',
-                        ephemeral: true
-                    });
-                    return;
-                }
-                return;
-            }
-            
-            // Check if user is in the same voice channel
-            const member = interaction.member;
-            
-            // Skip voice channel check for buttons that can be used from anywhere
-            if (interaction.customId === 'help' || interaction.customId === 'play') {
-                // These buttons don't require voice channel check
-            } 
-            // Check if player needs voice channel
-            else if (player && (!member.voice.channel || member.voice.channel.id !== player.voiceId)) {
+
+            // Log button interaction for debugging
+            console.log(`Button pressed: ${interaction.customId}`);
+
+            // Handle special case buttons first
+            if (['play', 'help', '247toggle', 'leave'].includes(interaction.customId)) {
+                // These buttons will be handled in their respective switch cases
+                console.log(`Special button ${interaction.customId} pressed`);
+            } else if (!player) {
+                // Only check for player if it's not a special button
                 await safeReply(interaction, { 
-                    content: 'You must be in the same voice channel to use these controls!',
+                    content: 'No active player found! Start playback with the /play command.',
                     ephemeral: true
                 });
                 return;
             }
-            
+
+            // Process button interaction
             try {
                 switch (interaction.customId) {
-                    case 'replay':
-                        try {
-                            // Seek to position 0 (beginning of the track)
-                            await player.seek(0);
-                            await interaction.reply({ 
-                                content: 'Replaying current track from the beginning!',
-                                ephemeral: true 
-                            }).catch(() => {});
-                        } catch (error) {
-                            // Silent error handling
-                        }
-                        break;
-                        
-                    // Combined pause/resume toggle button
                     case 'pauseresume':
-                        try {
-                            // Debug the current state
-                            console.log(`Pause/Resume button clicked - Current paused state: ${player.paused}`);
-                            
-                            // Get the nowplaying message information
-                            const messageInfo = client.nowPlayingMessages.get(guild.id);
-                            
-                            // First, check if the player is already paused
-                            if (player.paused) {
-                                // Currently paused, so resume it
-                                console.log("Player is paused, resuming playback");
-                                await player.pause(false);
-                                await safeReply(interaction, { 
-                                    content: 'Resumed the playback!',
-                                    ephemeral: true 
-                                });
-                            } else {
-                                // Currently playing, so pause it
-                                console.log("Player is playing, pausing playback");
-                                await player.pause(true);
-                                await safeReply(interaction, { 
-                                    content: 'Paused the playback!',
-                                    ephemeral: true 
-                                });
-                            }
-                            
-                            // Update the button's label if we have a message
-                            if (messageInfo) {
-                                try {
-                                    const messageChannel = client.channels.cache.get(messageInfo.channelId);
-                                    if (messageChannel) {
-                                        const message = await messageChannel.messages.fetch(messageInfo.messageId).catch(() => null);
-                                        if (message && message.editable) {
-                                            // Keep the label as "Pause/Resume" for consistency
-                                            const newLabel = "Pause/Resume";
-                                            
-                                            // Create new action rows with updated button label
-                                            const updatedRows = [];
-                                            
-                                            // Process each existing row in the message
-                                            for (const row of message.components) {
-                                                const newRow = new ActionRowBuilder();
-                                                const newComponents = [];
-                                                
-                                                // Process each component in the row
-                                                for (const component of row.components) {
-                                                    if (component.type === 2) { // Button type
-                                                        // Create a new button based on the existing one
-                                                        const newButton = new ButtonBuilder()
-                                                            .setCustomId(component.customId)
-                                                            .setStyle(component.style);
-                                                        
-                                                        // If this is the pause/resume button, update its label
-                                                        if (component.customId === 'pauseresume') {
-                                                            newButton.setLabel(newLabel);
-                                                        } else {
-                                                            newButton.setLabel(component.label);
-                                                        }
-                                                        
-                                                        newComponents.push(newButton);
-                                                    } else if (component.type === 3) { // Select menu type
-                                                        // Copy the select menu as is
-                                                        const selectMenu = new StringSelectMenuBuilder()
-                                                            .setCustomId(component.customId)
-                                                            .setPlaceholder(component.placeholder)
-                                                            .addOptions(component.options);
-                                                        
-                                                        newRow.addComponents(selectMenu);
-                                                    }
-                                                }
-                                                
-                                                // If we have buttons to add, add them to the row
-                                                if (newComponents.length > 0) {
-                                                    newRow.addComponents(newComponents);
-                                                }
-                                                
-                                                // Add the row if it has components
-                                                if (newRow.components && newRow.components.length > 0) {
-                                                    updatedRows.push(newRow);
-                                                }
-                                            }
-                                            
-                                            // Edit the message with the updated rows
-                                            if (updatedRows.length > 0) {
-                                                await message.edit({ components: updatedRows }).catch(() => {});
-                                            }
-                                        }
-                                    }
-                                } catch (error) {
-                                    // Log error but don't break functionality
-                                    console.error("Error updating pause/resume button:", error.message);
-                                }
-                            }
-                        } catch (error) {
-                            // Silent error handling
-                            console.error("Error in pauseresume button:", error);
-                        }
+                        if (!player) return;
+                        const isPaused = player.paused;
+                        await player.pause(!isPaused);
+                        await safeReply(interaction, {
+                            content: `Music ${!isPaused ? 'paused' : 'resumed'}!`,
+                            ephemeral: true
+                        });
                         break;
-                    
-                    // Keep these for backward compatibility with any old messages
-                    case 'pause':
-                        try {
-                            console.log("Legacy pause button used");
-                            // Make sure it's not already paused
-                            if (!player.paused) {
-                                await player.pause(true);
-                                console.log("Paused the playback");
-                            } else {
-                                console.log("Playback already paused");
-                            }
-                            await safeReply(interaction, { 
-                                content: 'Paused the playback!',
-                                ephemeral: true 
-                            });
-                        } catch (error) {
-                            console.error("Error in pause button:", error);
-                        }
-                        break;
-                        
-                    case 'resume':
-                        try {
-                            console.log("Legacy resume button used");
-                            // Make sure it's actually paused
-                            if (player.paused) {
-                                await player.pause(false);
-                                console.log("Resumed the playback");
-                            } else {
-                                console.log("Playback already playing");
-                            }
-                            await safeReply(interaction, { 
-                                content: 'Resumed the playback!',
-                                ephemeral: true 
-                            });
-                        } catch (error) {
-                            console.error("Error in resume button:", error);
-                        }
-                        break;
-                        
+
                     case 'skip':
-                        try {
-                            // Get the current track before skipping
-                            const currentTrack = player.queue.current;
-                            
-                            // Skip to the next track
-                            await player.skip();
-                            
-                            // Get the now-playing track after skipping
-                            const nextTrack = player.queue.current;
-                            
-                            // Use safe reply method
-                            await safeReply(interaction, { 
-                                content: 'Skipped to the next track!',
-                                ephemeral: true 
-                            });
-                            
-                            // Only refresh controls if there's a new track to play
-                            if (nextTrack) {
-                                // Get text channel
-                                const channel = client.channels.cache.get(player.textId);
-                                if (channel) {
-                                    try {
-                                        // This will trigger the events for the new track
-                                        // which will create a new Now Playing message with controls
-                                        setTimeout(() => {
-                                            // Import required modules
-                                            const { createMusicCard, formatDuration } = require('../utils/formatters');
-                                            const { createEmbed } = require('../utils/embeds');
-                                            
-                                            // Create a new now playing message with buttons
-                                            client.emit('refreshNowPlaying', player, nextTrack, channel);
-                                        }, 500); // Small delay to ensure skip is fully processed
-                                    } catch (refreshError) {
-                                        console.error("Error refreshing now playing after skip:", refreshError);
-                                    }
-                                }
-                            }
-                        } catch (error) {
-                            console.error("Error in skip button:", error);
-                            await safeReply(interaction, {
-                                content: 'Failed to skip the track.',
-                                ephemeral: true
-                            });
-                        }
+                        if (!player) return;
+                        await player.skip();
+                        await safeReply(interaction, {
+                            content: 'Skipped to next track!',
+                            ephemeral: true
+                        });
                         break;
-                        
+
                     case 'stop':
-                        try {
-                            // Get the message ID before destroying the player
-                            const messageInfo = client.nowPlayingMessages.get(guild.id);
-                            
-                            // Make sure the user is in a voice channel and it's the same as the bot's
-                            const member = interaction.member;
-                            const userVoiceChannel = member.voice.channel;
-                            
-                            if (!userVoiceChannel) {
-                                await safeReply(interaction, { 
-                                    content: 'You need to be in a voice channel to stop playback.',
-                                    ephemeral: true 
-                                });
-                                return;
-                            }
-                            
-                            if (userVoiceChannel.id !== player.voiceId) {
-                                await safeReply(interaction, { 
-                                    content: 'You need to be in the same voice channel to stop playback.',
-                                    ephemeral: true 
-                                });
-                                return;
-                            }
-                            
-                            // Destroy the player
-                            player.destroy();
-                            
-                            // Remove components from the now playing message
-                            if (messageInfo) {
-                                try {
-                                    const messageChannel = client.channels.cache.get(messageInfo.channelId);
-                                    if (messageChannel) {
-                                        const message = await messageChannel.messages.fetch(messageInfo.messageId).catch(() => null);
-                                        if (message && message.editable) {
-                                            // Remove all components (buttons)
-                                            await message.edit({ components: [] }).catch(() => {});
-                                        }
-                                    }
-                                } catch (e) {
-                                    // Silent error handling
-                                    console.error("Error removing buttons on stop:", e.message);
-                                }
-                            }
-                            
-                            // Send success message
-                            await safeReply(interaction, { 
-                                content: 'Stopped playback.',
-                                ephemeral: true 
-                            });
-                        } catch (error) {
-                            // Log error but don't break functionality
-                            console.error("Error in stop button:", error.message);
-                            
-                            // Try to send a friendly error message
-                            try {
-                                await safeReply(interaction, { 
-                                    content: 'Failed to stop playback. Please try again.',
-                                    ephemeral: true 
-                                });
-                            } catch (replyError) {
-                                // Silent catch
-                            }
-                        }
+                        if (!player) return;
+                        player.destroy();
+                        await safeReply(interaction, {
+                            content: 'Stopped playback!',
+                            ephemeral: true
+                        });
                         break;
-                        
-                    case 'queue':
-                        try {
-                            // Instead of trying to reuse the queue command's implementation,
-                            // let's implement simplified queue info directly
-                            const queue = player.queue;
-                            if (!queue || queue.length === 0) {
-                                await interaction.reply({
-                                    content: 'There are no tracks in the queue',
-                                    ephemeral: true
-                                }).catch(() => {});
-                                break;
-                            }
-                            
-                            // Create a simplified queue display
-                            let description = '';
-                            // Get up to 5 tracks to show
-                            const tracksToShow = Math.min(5, queue.length);
-                            for (let i = 0; i < tracksToShow; i++) {
-                                const track = queue[i];
-                                description += `**${i+1}.** ${track.title}\n`;
-                            }
-                            
-                            if (queue.length > tracksToShow) {
-                                description += `\n... and ${queue.length - tracksToShow} more track(s)`;
-                            }
-                            
-                            await interaction.reply({
-                                content: `**Queue - ${queue.length} track(s)**\n\n${description}`,
-                                ephemeral: true
-                            }).catch(() => {});
-                        } catch (error) {
-                            // Silent error handling
-                        }
-                        break;
-                        
-                    case 'loop':
-                        try {
-                            // Handle loop mode cycling: none > track > queue > none
-                            // Kazagumo uses 'none', 'track', 'queue' as valid loop modes
-                            const loopModes = ['none', 'track', 'queue'];
-                            const currentMode = player.loop || 'none';
-                            const currentIndex = loopModes.indexOf(currentMode);
-                            const nextIndex = (currentIndex + 1) % loopModes.length;
-                            const nextMode = loopModes[nextIndex];
-                            
-                            player.setLoop(nextMode);
-                            
-                            // Friendly mode names for the message
-                            const modeNames = {
-                                'none': 'disabled',
-                                'track': 'current track',
-                                'queue': 'entire queue'
-                            };
-                            
-                            await interaction.reply({ 
-                                content: `Loop mode set to: ${modeNames[nextMode]}`,
-                                ephemeral: true 
-                            }).catch(() => {});
-                        } catch (error) {
-                            // Silent error handling
-                        }
-                        break;
-                        
-                    case 'shuffle':
-                        try {
-                            // Make sure we have a player that's playing
-                            if (!player.playing) {
-                                await safeReply(interaction, { 
-                                    content: 'There is no music currently playing.',
-                                    ephemeral: true 
-                                });
-                                break;
-                            }
-                            
-                            // Get the current queue
-                            const queueSize = player.queue.size;
-                            
-                            // Shuffle regardless of queue size (but warn if empty)
-                            if (queueSize > 0) {
-                                // Preserve the current track, shuffle the rest
-                                player.queue.shuffle();
-                                
-                                await safeReply(interaction, { 
-                                    content: `Queue has been shuffled! Rearranged ${queueSize} song${queueSize === 1 ? '' : 's'}.`,
-                                    ephemeral: true 
-                                });
-                            } else {
-                                await safeReply(interaction, {
-                                    content: 'No additional tracks in queue. Add more songs to create a shuffle mix!',
-                                    ephemeral: true
-                                });
-                            }
-                        } catch (error) {
-                            console.error("Error in shuffle button:", error);
-                            try {
-                                await safeReply(interaction, { 
-                                    content: 'Failed to shuffle the queue. Please try again.',
-                                    ephemeral: true 
-                                });
-                            } catch (replyError) {
-                                // Silent catch
-                            }
-                        }
-                        break;
-                        
-                    case 'volume_down':
-                        try {
-                            const currentVolume = player.volume;
-                            // Decrease by 10%, minimum volume is 0
-                            const newVolume = Math.max(0, currentVolume - 10);
-                            await player.setVolume(newVolume);
-                            
-                            // Create a volume bar
-                            const volumeBar = createVolumeBar(newVolume);
-                            
-                            await interaction.reply({ 
-                                content: `Volume set to ${newVolume}% ${volumeBar}`,
-                                ephemeral: true 
-                            }).catch(() => {});
-                        } catch (error) {
-                            // Silent error handling
-                        }
-                        break;
-                        
-                    case 'volume_up':
-                        try {
-                            const currentVolume = player.volume;
-                            // Increase by 10%, maximum volume is 200
-                            const newVolume = Math.min(200, currentVolume + 10);
-                            await player.setVolume(newVolume);
-                            
-                            // Create a volume bar
-                            const volumeBar = createVolumeBar(newVolume);
-                            
-                            await interaction.reply({ 
-                                content: `Volume set to ${newVolume}% ${volumeBar}`,
-                                ephemeral: true 
-                            }).catch(() => {});
-                        } catch (error) {
-                            // Silent error handling
-                        }
-                        break;
-                        
-                    case 'replay':
-                        try {
-                            // Get the current track
-                            const currentTrack = player.queue.current;
-                            if (!currentTrack) {
-                                await interaction.reply({
-                                    content: 'No track is currently playing!',
-                                    ephemeral: true
-                                }).catch(() => {});
-                                break;
-                            }
-                            
-                            // Replay the current track by seeking to position 0
-                            await player.seek(0);
-                            
-                            await interaction.reply({
-                                content: `Replaying track: **${currentTrack.title}**`,
-                                ephemeral: true
-                            }).catch(() => {});
-                        } catch (error) {
-                            // Silent error handling
-                        }
-                        break;
-                        
+
+                    // Add other button handlers here...
+
                     default:
-                        try {
-                            await interaction.reply({ 
-                                content: 'Unknown button action',
-                                ephemeral: true 
-                            }).catch(() => {});
-                        } catch (error) {
-                            // Silent error handling
-                        }
-                        break;
-                        
-                    // Handlers for queue ended buttons
-                    case 'play_again':
-                    case 'play':
-                        try {
-                            // Respond with a message directing the user to use the /play command
-                            await interaction.reply({
-                                content: 'Please use the `/play` command to search for and play music!',
-                                ephemeral: true
-                            }).catch(() => {});
-                        } catch (error) {
-                            // Silent error handling
-                        }
-                        break;
-                        
-                    case 'leave':
-                        try {
-                            // Check if there's still an active player
-                            const player = client.kazagumo.players.get(guild.id);
-                            if (player) {
-                                player.destroy();
-                                await interaction.reply({
-                                    content: 'Left the voice channel and cleared the queue!',
-                                    ephemeral: true
-                                }).catch(() => {});
-                            } else {
-                                // No player, so just send a message
-                                await interaction.reply({
-                                    content: 'I am not in a voice channel!',
-                                    ephemeral: true
-                                }).catch(() => {});
-                            }
-                        } catch (error) {
-                            // Silent error handling
-                        }
-                        break;
-                        
-                    case '247toggle':
-                        try {
-                            if (!member.voice.channel) {
-                                await interaction.reply({
-                                    content: 'You must be in a voice channel to toggle 24/7 mode!',
-                                    ephemeral: true
-                                }).catch(() => {});
-                                break;
-                            }
-                            
-                            // Toggle 24/7 mode
-                            if (client.twentyFourSeven.has(guild.id)) {
-                                client.twentyFourSeven.delete(guild.id);
-                                await interaction.reply({
-                                    content: '24/7 mode has been disabled. I will disconnect after inactivity.',
-                                    ephemeral: true
-                                }).catch(() => {});
-                            } else {
-                                client.twentyFourSeven.set(guild.id, member.voice.channel.id);
-                                await interaction.reply({
-                                    content: '24/7 mode has been enabled. I will stay in the voice channel indefinitely.',
-                                    ephemeral: true
-                                }).catch(() => {});
-                            }
-                        } catch (error) {
-                            // Silent error handling
-                        }
-                        break;
-                        
-                    case 'help':
-                        try {
-                            const helpText = `**Bot Help**
-Here are the main commands you can use:
-
-• \`/play\` - Play a song by name or URL
-• \`/queue\` - View the current queue
-• \`/skip\` - Skip the current track
-• \`/stop\` - Stop playback and clear queue
-• \`/247\` - Toggle 24/7 mode
-• \`/vote\` - Vote for Audic on bot list sites
-• \`/help\` - Show detailed help`;
-
-                            await safeReply(interaction, {
-                                content: helpText,
-                                ephemeral: true
-                            });
-                        } catch (error) {
-                            // Silent error handling
-                        }
+                        await safeReply(interaction, {
+                            content: 'This button action is not yet implemented.',
+                            ephemeral: true
+                        });
                         break;
                 }
             } catch (error) {
-                // Silent error handling for the entire button section
+                console.error('Button interaction error:', error);
+                await safeReply(interaction, {
+                    content: 'An error occurred while processing the button.',
+                    ephemeral: true
+                });
             }
         } else if (interaction.isStringSelectMenu()) {
             // Log select menu interaction
@@ -737,16 +225,16 @@ Here are the main commands you can use:
                         const wasPlaying = player.playing;
                         const currentPosition = player.position;
                         const currentTrack = player.queue.current;
-                        
+
                         // Clear all filters
                         const success = await clearFilters(player);
-                        
+
                         if (success) {
                             // Ensure music is still playing
                             if (wasPlaying && !player.playing && currentTrack) {
                                 await player.pause(false);
                             }
-                            
+
                             await safeReply(interaction, {
                                 content: 'All filters have been cleared! Music will continue playing.',
                                 ephemeral: true
@@ -762,7 +250,7 @@ Here are the main commands you can use:
                         const wasPlaying = player.playing;
                         const currentPosition = player.position;
                         const currentTrack = player.queue.current;
-                        
+
                         // Apply the selected filter
                         const success = await applyFilter(player, selectedFilter);
 
@@ -771,7 +259,7 @@ Here are the main commands you can use:
                             if (wasPlaying && !player.playing && currentTrack) {
                                 await player.pause(false);
                             }
-                            
+
                             await safeReply(interaction, {
                                 content: `Applied the ${getFilterDisplayName(selectedFilter)} filter! Music will continue playing.`,
                                 ephemeral: true

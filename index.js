@@ -77,8 +77,27 @@ client.kazagumo = new Kazagumo({
 }, new Connectors.DiscordJS(client), config.lavalink.nodes);
 
 // Load commands
-const commandsPath = path.join(__dirname, 'commands');
-const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+// Load commands from both music and general directories
+const musicCommandsPath = path.join(__dirname, 'commands', 'music');
+const generalCommandsPath = path.join(__dirname, 'commands', 'general');
+
+const loadCommands = (dirPath) => {
+    const files = fs.readdirSync(dirPath).filter(file => file.endsWith('.js'));
+    for (const file of files) {
+        const filePath = path.join(dirPath, file);
+        const command = require(filePath);
+        
+        if ('data' in command && 'execute' in command) {
+            client.commands.set(command.data.name, command);
+            console.log(`Loaded command: ${command.data.name}`);
+        } else {
+            console.log(`[WARNING] The command at ${filePath} is missing required properties`);
+        }
+    }
+};
+
+loadCommands(musicCommandsPath);
+loadCommands(generalCommandsPath);
 
 for (const file of commandFiles) {
     const filePath = path.join(commandsPath, file);
