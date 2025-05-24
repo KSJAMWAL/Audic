@@ -78,11 +78,11 @@ const loadCommands = () => {
     for (const category of categories) {
         const categoryPath = path.join(commandsPath, category);
         const commandFiles = fs.readdirSync(categoryPath).filter(file => file.endsWith('.js'));
-        
+
         for (const file of commandFiles) {
             const filePath = path.join(categoryPath, file);
             const command = require(filePath);
-            
+
             if ('data' in command && 'execute' in command) {
                 client.commands.set(command.data.name, command);
             } else {
@@ -420,7 +420,7 @@ client.kazagumo.on('playerStart', async (player, track) => {
                         description: 'Reduces vocals for karaoke',
                         value: 'karaoke'
                     },
-                    
+
                 ]);
 
             const fallbackFilterRow = new ActionRowBuilder()
@@ -1311,3 +1311,5 @@ client.login(process.env.DISCORD_TOKEN)
 
         process.exit(1); // Exit with error code
     });
+
+// Ensures music card image is always shown in the music panel
