@@ -49,7 +49,6 @@ module.exports = {
         }
 
         // Handle prefix commands
-        const prefix = config.prefix;
         if (message.content.startsWith(prefix)) {
             const args = message.content.slice(prefix.length).trim().split(/ +/);
             const commandName = args.shift().toLowerCase();
