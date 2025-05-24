@@ -14,9 +14,9 @@ module.exports = {
             ctx.fillStyle = '#1a1a1a';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Load and draw thumbnail
-            const thumbnail = await loadImage(track.thumbnail || 'https://cdn.discordapp.com/attachments/1234567890/music-placeholder.png');
-            ctx.drawImage(thumbnail, 25, 25, 200, 200);
+            // Load and draw initial thumbnail
+            const initialThumbnail = await loadImage(track.thumbnail || 'https://cdn.discordapp.com/attachments/1234567890/music-placeholder.png');
+            ctx.drawImage(initialThumbnail, 25, 25, 200, 200);
 
             // Title and artist text
             ctx.fillStyle = '#ffffff';
@@ -67,7 +67,7 @@ module.exports = {
             ctx.clip();
             
             // Load and draw thumbnail
-            let thumbnail;
+            let detailedThumbnail;
             try {
                 // Check if thumbnail exists and is a valid URL
                 if (!track.thumbnail || track.thumbnail.startsWith('attachment://')) {
@@ -85,19 +85,19 @@ module.exports = {
                     const videoId = track.uri.split('v=')[1].split('&')[0];
                     if (videoId) {
                         const highQualityThumbnail = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
-                        thumbnail = await loadImage(highQualityThumbnail);
+                        detailedThumbnail = await loadImage(highQualityThumbnail);
                     } else {
                         throw new Error('Could not extract valid YouTube video ID');
                     }
                 } else {
                     // For non-YouTube tracks, use the provided thumbnail
-                    thumbnail = await loadImage(track.thumbnail);
+                    detailedThumbnail = await loadImage(track.thumbnail);
                 }
             } catch (imgError) {
                 // Try to use a guaranteed default image hosted by Discord
                 try {
                     // Discord's music icon (should be consistently available)
-                    thumbnail = await loadImage('https://cdn.discordapp.com/attachments/1092885051546558574/1224143546803499089/music_note.png');
+                    detailedThumbnail = await loadImage('https://cdn.discordapp.com/attachments/1092885051546558574/1224143546803499089/music_note.png');
                 } catch (fallbackError) {
                     // If even the Discord-hosted image fails, create a local fallback
                     const fallbackImg = createCanvas(200, 200);
@@ -108,11 +108,11 @@ module.exports = {
                     fctx.font = 'bold 30px Arial';
                     fctx.textAlign = 'center';
                     fctx.fillText('♫', 100, 110);
-                    thumbnail = fallbackImg;
+                    detailedThumbnail = fallbackImg;
                 }
             }
             // YouTube Music mobile-style perfect square thumbnail
-            ctx.drawImage(thumbnail, thumbX, thumbY, thumbSize, thumbSize);
+            ctx.drawImage(detailedThumbnail, thumbX, thumbY, thumbSize, thumbSize);
             ctx.restore();
             
             // Add a subtle border to the album art
