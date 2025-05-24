@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { createEmbed, errorEmbed } = require('../utils/embeds');
-const config = require('../config');
+const { createEmbed, errorEmbed } = require('../../utils/embeds');
+const config = require('../../config');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -13,7 +13,7 @@ module.exports = {
                 .setMinValue(0)
                 .setMaxValue(100)),
     
-    async execute(context) {
+    async execute(interaction) {
         const { client } = interaction;
         const guildId = interaction.guildId;
         const volumeLevel = interaction.options.getInteger('level');
