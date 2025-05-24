@@ -31,10 +31,21 @@ module.exports = {
 
             logger.system('Command Registration', 'Started refreshing application (/) commands.');
 
-            await rest.put(
-                Routes.applicationCommands(process.env.CLIENT_ID),
-                { body: commands },
-            );
+            // Register commands
+            try {
+                await rest.put(
+                    Routes.applicationCommands(process.env.CLIENT_ID),
+                    { body: commands },
+                );
+                
+                // Log the registered commands
+                console.log('Registered commands:', commands.map(cmd => cmd.name).join(', '));
+                
+                logger.system('Command Registration', `Successfully registered ${commands.length} commands!`);
+            } catch (error) {
+                console.error('Error registering commands:', error);
+                logger.error('Command Registration Error', error);
+            }
 
             logger.system('Command Registration', 'Successfully registered application commands.');
             logger.system('Bot Status', `Logged in as ${client.user.tag}`);
