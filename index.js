@@ -270,15 +270,15 @@ client.kazagumo.on('playerStart', async (player, track) => {
                 .addComponents(
                     new ButtonBuilder()
                         .setCustomId('pauseresume')
-                        .setLabel('Pause/Resume')
+                        .setEmoji(player.paused ? '▶️' : '⏸️')
                         .setStyle(ButtonStyle.Primary),
                     new ButtonBuilder()
                         .setCustomId('replay')
-                        .setLabel('Replay')
+                        .setEmoji('🔄')
                         .setStyle(ButtonStyle.Secondary),
                     new ButtonBuilder()
                         .setCustomId('skip')
-                        .setLabel('Skip')
+                        .setEmoji('⏭️')
                         .setStyle(ButtonStyle.Secondary)
                 );
 
@@ -951,8 +951,23 @@ Here are the main commands you can use:
 
                 // Keep backward compatibility with old 'pauseresume' button for a while
                 case 'pauseresume':
-                    // Simple toggle approach
                     const isPaused = player.paused;
+                    // Update the button with new emoji
+                    const updatedRow = new ActionRowBuilder()
+                        .addComponents(
+                            new ButtonBuilder()
+                                .setCustomId('pauseresume')
+                                .setEmoji(!isPaused ? '▶️' : '⏸️')
+                                .setStyle(ButtonStyle.Primary),
+                            new ButtonBuilder()
+                                .setCustomId('replay')
+                                .setEmoji('🔄')
+                                .setStyle(ButtonStyle.Secondary),
+                            new ButtonBuilder()
+                                .setCustomId('skip')
+                                .setEmoji('⏭️')
+                                .setStyle(ButtonStyle.Secondary)
+                        );
                     player.pause(!isPaused);
 
                     console.log(`Legacy pauseresume button used. Was paused: ${isPaused}, Now paused: ${player.paused}`);
