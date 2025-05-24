@@ -51,11 +51,14 @@ module.exports = {
                 }
             }
 
-            // Search for tracks with better error handling
-            const searchResult = await client.kazagumo.search(query, { 
+            const searchOptions = {
                 engine: 'youtube_music', // Use YouTube Music as the source
-                requester: interaction.user 
-            }).catch(error => {
+                requester: interaction.user,
+                limit: 10, // Limit the results to the top 10
+            };
+
+            // Search for tracks with better error handling
+            const searchResult = await client.kazagumo.search(query, searchOptions).catch(error => {
                 console.error('Search error:', error);
                 // Display a more user-friendly error message
                 if (error.message && error.message.includes('Connect Timeout Error')) {
