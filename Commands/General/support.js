@@ -7,7 +7,7 @@ module.exports = {
         .setName('support')
         .setDescription('Join support server'),
     
-    async execute(interaction) {
+    async execute(context) {
         const supportEmbed = createEmbed({
             title: `Support Server`,
             description: `Need help with ${config.botName}? Join our support server for assistance!`,

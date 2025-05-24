@@ -5,8 +5,10 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('vote')
         .setDescription('Get links to vote for Audic on bot lists'),
-    
-    async execute(interaction) {
+
+    async execute(context) {
+        const { client } = context;
+
         const voteEmbed = createEmbed({
             title: 'Vote for Audic',
             description: 'Your votes help Audic grow and reach more communities!\n\n' +
@@ -14,7 +16,7 @@ module.exports = {
                        '[Vote on Discord Bot List](https://discordbotlist.com/bots/audic/upvote)',
             color: '#87CEEB'
         });
-        
-        await interaction.reply({ embeds: [voteEmbed] });
+
+        await context.reply({ embeds: [voteEmbed] });
     }
 };

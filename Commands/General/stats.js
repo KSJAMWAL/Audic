@@ -8,8 +8,8 @@ module.exports = {
         .setName('stats')
         .setDescription('View bot statistics'),
     
-    async execute(interaction) {
-        const { client } = interaction;
+    async execute(context) {
+        const { client } = context;
         
         // Collect general stats
         const serverCount = client.guilds.cache.size;

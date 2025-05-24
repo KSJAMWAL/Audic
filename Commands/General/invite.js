@@ -6,24 +6,25 @@ module.exports = {
         .setName('invite')
         .setDescription('Invite bot to server'),
 
-    async execute(interaction) {
+    async execute(context) {
+        const { client } = context;
         try {
             // Ensure interaction hasn't already been replied to before deferring
-            if (!interaction.deferred && !interaction.replied) {
-                await interaction.deferReply({ ephemeral: false }).catch(err => {
+            if (!context.deferred && !context.replied) {
+                await context.deferReply({ ephemeral: false }).catch(err => {
                     console.error('Failed to defer reply in invite command:', err);
                     return;
                 });
             }
 
             // Get client ID from environment or use fallback
-            let clientId = process.env.CLIENT_ID || interaction.client.user?.id || '1095642714854182912';
+            let clientId = process.env.CLIENT_ID || context.client.user?.id || '1095642714854182912';
 
             // Retrieve server details safely
-            const serverName = interaction.guild?.name || "Homey Bot";
-            const serverIcon = interaction.guild?.iconURL() || interaction.client.user.displayAvatarURL();
-            const botLogo = interaction.client.user.displayAvatarURL();
-            const userIcon = interaction.user.displayAvatarURL();
+            const serverName = context.guild?.name || "Homey Bot";
+            const serverIcon = context.guild?.iconURL() || context.client.user.displayAvatarURL();
+            const botLogo = context.client.user.displayAvatarURL();
+            const userIcon = context.user.displayAvatarURL();
 
             // Define bot permissions
             const permissions = 277083450432;
@@ -56,7 +57,7 @@ module.exports = {
                 );
 
             // Edit the deferred reply safely
-            await interaction.editReply({ embeds: [inviteEmbed], components: [row] }).catch(err => {
+            await context.editReply({ embeds: [inviteEmbed], components: [row] }).catch(err => {
                 console.error('Failed to edit reply in invite command:', err);
             });
 
@@ -65,10 +66,10 @@ module.exports = {
 
             try {
                 // Ensure proper error response without duplicate interactions
-                if (!interaction.replied && !interaction.deferred) {
-                    await interaction.reply({ content: 'Sorry, an error occurred while processing your invite request.', ephemeral: true });
+                if (!context.replied && !context.deferred) {
+                    await context.reply({ content: 'Sorry, an error occurred while processing your invite request.', ephemeral: true });
                 } else {
-                    await interaction.editReply({ content: 'Sorry, there was an error processing your invite request.', embeds: [], components: [] });
+                    await context.editReply({ content: 'Sorry, there was an error processing your invite request.', embeds: [], components: [] });
                 }
             } catch (responseError) {
                 console.error('Failed to send error response:', responseError);
