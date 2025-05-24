@@ -294,47 +294,47 @@ client.kazagumo.on('playerStart', async (player, track) => {
                 .setMaxValues(1)
                 .addOptions([
                     {
-                        label: 'No Filter',
+                        label: '🚫 No Filter',
                         description: 'Remove all filters',
                         value: 'none'
                     },
                     {
-                        label: 'Bass Boost',
+                        label: '💥 Bass Boost',
                         description: 'Enhance the bass frequencies',
                         value: 'bassboost'
                     },
                     {
-                        label: '8D Audio',
+                        label: '🎧 8D Audio',
                         description: 'Creates a spatial rotation effect',
                         value: '8d'
                     },
                     {
-                        label: 'Nightcore',
+                        label: '⚡ Nightcore',
                         description: 'Faster with tremolo effect',
                         value: 'nightcore'
                     },
                     {
-                        label: 'Vaporwave',
+                        label: '🌊 Vaporwave',
                         description: 'Slowed down with reverb-like effect',
                         value: 'vaporwave'
                     },
                     {
-                        label: 'Karaoke',
+                        label: '🎤 Karaoke',
                         description: 'Reduces vocals for karaoke',
                         value: 'karaoke'
                     },
                     {
-                        label: 'Lowpass',
+                        label: '📉 Lowpass',
                         description: 'Reduces high frequencies',
                         value: 'lowpass'
                     },
                     {
-                        label: 'Timescale',
+                        label: '⏱️ Timescale',
                         description: 'Custom speed and pitch',
                         value: 'timescale'
                     },
                     {
-                        label: 'Slowmode',
+                        label: '🐢 Slowmode',
                         description: 'Slows down the playback',
                         value: 'slowmode'
                     }
