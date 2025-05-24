@@ -349,11 +349,11 @@ client.kazagumo.on('playerStart', async (player, track) => {
                 .addComponents(
                     new ButtonBuilder()
                         .setCustomId('shuffle')
-                        .setLabel('Shuffle')
+                        .setEmoji('🔀')
                         .setStyle(ButtonStyle.Secondary),
                     new ButtonBuilder()
                         .setCustomId('stop')
-                        .setLabel('Stop')
+                        .setEmoji('⏹️')
                         .setStyle(ButtonStyle.Danger)
                 );
 
@@ -432,15 +432,15 @@ client.kazagumo.on('playerStart', async (player, track) => {
                 .addComponents(
                     new ButtonBuilder()
                         .setCustomId('pauseresume')
-                        .setLabel('Pause/Resume')
+                        .setEmoji(player.paused ? '▶️' : '⏸️')
                         .setStyle(ButtonStyle.Primary),
                     new ButtonBuilder()
                         .setCustomId('skip')
-                        .setLabel('Skip')
+                        .setEmoji('⏭️')
                         .setStyle(ButtonStyle.Secondary),
                     new ButtonBuilder()
                         .setCustomId('shuffle')
-                        .setLabel('Shuffle')
+                        .setEmoji('🔀')
                         .setStyle(ButtonStyle.Secondary)
                 );
 
