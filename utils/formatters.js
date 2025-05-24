@@ -2,14 +2,51 @@ const { createEmbed } = require('./embeds');
 
 const { createCanvas, loadImage } = require('canvas');
 const path = require('path');
+const { createCanvas, loadImage } = require('canvas');
+const { AttachmentBuilder } = require('discord.js');
 
 module.exports = {
     createMusicCard: async (track, isPlaying = false, position = 0) => {
         try {
-            // Creating music card for track
-            
             const canvas = createCanvas(900, 250);
             const ctx = canvas.getContext('2d');
+
+            // Background
+            ctx.fillStyle = '#1a1a1a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Load and draw thumbnail
+            const thumbnail = await loadImage(track.thumbnail || 'https://cdn.discordapp.com/attachments/1234567890/music-placeholder.png');
+            ctx.drawImage(thumbnail, 25, 25, 200, 200);
+
+            // Title and artist text
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '28px Arial';
+            ctx.fillText(track.title.slice(0, 40) + (track.title.length > 40 ? '...' : ''), 240, 45);
+            
+            ctx.fillStyle = '#b8b8b8';
+            ctx.font = '20px Arial';
+            ctx.fillText(track.author.slice(0, 40), 240, 85);
+
+            // Progress bar
+            if (!track.isStream) {
+                const barLength = 450;
+                const progress = position / track.length;
+                
+                // Background bar
+                ctx.fillStyle = '#4a4a4a';
+                ctx.fillRect(240, 170, barLength, 10);
+                
+                // Progress
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(240, 170, barLength * progress, 10);
+                
+                // Time stamps
+                ctx.fillStyle = '#b8b8b8';
+                ctx.font = '16px Arial';
+                ctx.fillText(module.exports.formatDuration(position), 240, 200);
+                ctx.fillText(module.exports.formatDuration(track.length), 240 + barLength - 50, 200);
+            }
 
             // Sky blue gradient background 
             const gradient = ctx.createLinearGradient(0, 0, 900, 250);
