@@ -1,5 +1,7 @@
 const config = require('../config');
 
+const config = require('../config');
+
 module.exports = {
     /**
      * Create a basic embed with consistent styling
