@@ -343,13 +343,6 @@ client.kazagumo.on('playerStart', async (player, track) => {
                         description: 'Slows down the playback',
                         value: 'slowmode'
                     }
-                        value: 'lowpass'
-                    },
-                    {
-                        label: 'Slow Mode',
-                        description: 'Slows down the playback',
-                        value: 'slowmode'
-                    }
                 ]);
 
             // Create filter dropdown row
