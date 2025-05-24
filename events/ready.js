@@ -1,43 +1,28 @@
 const { REST, Routes } = require('discord.js');
-const fs = require('fs');
-const path = require('path');
+const { join } = require('path');
+const { readdirSync } = require('fs');
+const logger = require('../utils/logger');
 
 module.exports = {
     name: 'ready',
     once: true,
     async execute(client) {
-        const config = require('../config');
-
-        // Set bot activity
-        client.user.setActivity('/help', { type: 2 }); // 2 = Listening to
-
-        // Log bot startup to webhook
-        const logger = require('../utils/logger');
-        logger.system('Bot Online', `Logged in as ${client.user.tag}`, [
-            { name: 'Servers', value: `${client.guilds.cache.size}`, inline: true },
-            { name: 'Users', value: `${client.users.cache.size}`, inline: true }
-        ]);
-
         try {
             // Register slash commands
-            const { REST } = require('discord.js');
-            const fs = require('fs');
             const commands = [];
-            
+
             // Load commands from both music and general directories
             const categories = ['music', 'general'];
             for (const category of categories) {
-                const commandsPath = path.join(__dirname, '..', 'commands', category);
-                if (fs.existsSync(commandsPath)) {
-                    const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
-                    
-                    for (const file of commandFiles) {
-                        const command = require(path.join(commandsPath, file));
-                        if (command?.data && typeof command.data.toJSON === 'function') {
-                            commands.push(command.data.toJSON());
-                        } else {
-                            logger.error(`Skipping invalid command file: ${file}`);
-                        }
+                const commandsPath = join(__dirname, '..', 'commands', category);
+                const commandFiles = readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+
+                for (const file of commandFiles) {
+                    const command = require(join(commandsPath, file));
+                    if (command?.data && typeof command.data.toJSON === 'function') {
+                        commands.push(command.data.toJSON());
+                    } else {
+                        logger.error(`Skipping invalid command file: ${file}`);
                     }
                 }
             }
@@ -51,11 +36,13 @@ module.exports = {
                 { body: commands },
             );
 
-            logger.system('Command Registration', 'Successfully reloaded application (/) commands.', [
-                { name: 'Commands Count', value: `${commands.length}`, inline: true }
-            ]);
+            logger.system('Command Registration', 'Successfully registered application commands.');
+            logger.system('Bot Status', `Logged in as ${client.user.tag}`);
+            
+            // Set bot activity
+            client.user.setActivity('/help', { type: 2 }); // 2 = Listening to
         } catch (error) {
-            logger.error('Command Registration', error);
+            logger.error('Error in ready event:', error);
         }
     },
 };
