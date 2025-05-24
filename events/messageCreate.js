@@ -57,32 +57,7 @@ module.exports = {
             if (!command) return;
 
             try {
-                // Create a hybrid context that mimics interaction properties
-                const hybridContext = {
-                    client: message.client,
-                    guild: message.guild,
-                    channel: message.channel,
-                    member: message.member,
-                    user: message.author,
-                    options: {
-                        getString: (name) => args[0],
-                        getNumber: (name) => Number(args[0]),
-                        getInteger: (name) => parseInt(args[0]),
-                        getBoolean: (name) => args[0]?.toLowerCase() === 'true',
-                    },
-                    reply: async (content) => {
-                        if (content.ephemeral) {
-                            return message.author.send(content);
-                        }
-                        return message.channel.send(content);
-                    },
-                    deferReply: async () => Promise.resolve(),
-                    editReply: async (content) => message.channel.send(content),
-                    isCommand: () => false,
-                    isMessageCommand: () => true
-                };
-
-                await command.execute(hybridContext);
+                await command.execute(message);
             } catch (error) {
                 console.error(error);
                 message.reply({ 
