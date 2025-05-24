@@ -48,9 +48,8 @@ client.on('interactionCreate', async interaction => {
             '`/vaporwave` - Apply vaporwave effect (slower with lower pitch)',
             '`/karaoke` - Apply karaoke effect (reduces vocals)',
             '`/lowpass` - Apply lowpass filter (reduces high frequencies)',
-            '`/slowmode` - Slow down the music playback',
             '`/timescale` - Adjust playback speed and pitch',
-            '`/clearfilter` - Remove all active filters'
+            '`/clearfilter` - Remove all active filters's'
         ],
         utility_commands: [
             '`/247` - Toggle 24/7 mode',

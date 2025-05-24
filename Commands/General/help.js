@@ -2,7 +2,7 @@ const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Embed
 
 const labelMap = {
     music_commands: '🎵 Music',
-    filter_commands: '🎛️ Filters',
+    filter_commands: '🎛️ Audio Filters',
     utility_commands: '⚙️ Utility',
     support_server: '👀 Support'
 };

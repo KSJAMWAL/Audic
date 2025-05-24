@@ -329,6 +329,16 @@ client.kazagumo.on('playerStart', async (player, track) => {
                         value: 'karaoke'
                     },
                     {
+                        label: 'Lowpass',
+                        description: 'Reduces high frequencies',
+                        value: 'lowpass'
+                    },
+                    {
+                        label: 'Timescale',
+                        description: 'Custom speed and pitch',
+                        value: 'timescale'
+                    }
+                    {
                         label: 'Low Pass',
                         description: 'Reduces high frequencies',
                         value: 'lowpass'
