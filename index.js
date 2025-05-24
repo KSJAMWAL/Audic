@@ -16,15 +16,7 @@ const { formatDuration } = require('./utils/formatters');
 const { createEmbed } = require('./utils/embeds');
 const logger = require('./utils/logger');
 
-// Add startup debugging logs
-console.log('Starting Discord Music Bot...');
-console.log('Environment variables present:');
-console.log('DISCORD_TOKEN exists:', !!process.env.DISCORD_TOKEN);
-console.log('DISCORD_TOKEN length:', process.env.DISCORD_TOKEN ? process.env.DISCORD_TOKEN.length : 0);
-console.log('CLIENT_ID exists:', !!process.env.CLIENT_ID);
-console.log('CLIENT_ID length:', process.env.CLIENT_ID ? process.env.CLIENT_ID.length : 0);
-console.log('LAVALINK_HOST:', process.env.LAVALINK_HOST);
-console.log('LAVALINK_PORT:', process.env.LAVALINK_PORT);
+console.clear(); // Clear previous console output
 
 // Set timeout to detect if login takes too long
 setTimeout(() => {
@@ -127,7 +119,7 @@ for (const file of eventFiles) {
 }
 
 // Shoukaku events
-shoukaku.on('ready', (name) => console.log(`Lavalink ${name}: Ready!`));
+shoukaku.on('ready', (name) => console.log(`✅ Lavalink Status: Connected`));
 shoukaku.on('close', (name, code, reason) => {
     // Only log server closure for non-normal close codes
     if (code !== 1000 && code < 4000) {
@@ -1263,8 +1255,9 @@ const loginTimeout = setTimeout(() => {
 
 client.login(process.env.DISCORD_TOKEN)
     .then(() => {
-        clearTimeout(loginTimeout); // Clear the timeout if login succeeds
-        console.log('Successfully logged in to Discord!');
+        clearTimeout(loginTimeout);
+        console.log(`✅ Bot Status: ${client.user.tag}`);
+        console.log(`📊 Servers: ${client.guilds.cache.size} | Users: ${client.users.cache.size}`);
 
         // Log successful bot startup to webhook
         logger.system('Bot Startup', `Bot successfully started and logged in as ${client.user.tag}`, [
