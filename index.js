@@ -105,6 +105,12 @@ loadCommands(generalCommandsPath);
 const eventsPath = path.join(__dirname, 'events');
 const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
 
+// Add messageCreate event handler for prefix commands
+client.on('messageCreate', (message) => {
+    const messageCreateEvent = require('./events/messageCreate.js');
+    messageCreateEvent.execute(message);
+});
+
 for (const file of eventFiles) {
     const filePath = path.join(eventsPath, file);
     const event = require(filePath);

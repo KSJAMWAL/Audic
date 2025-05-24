@@ -1,5 +1,6 @@
 
 module.exports = {
+    prefix: '!', // Default prefix for message commands
     botName: 'Homey',
     botDescription: '**Helping your server stay smooth & efficient!**',
     embedColor: '#7289DA',

@@ -1,4 +1,3 @@
-
 const { SlashCommandBuilder } = require('discord.js');
 const { createEmbed, errorEmbed } = require('../../utils/embeds');
 const config = require('../../config');
@@ -16,25 +15,25 @@ module.exports = {
                     { name: 'Queue', value: 'queue' },
                     { name: 'Off', value: 'off' }
                 )),
-    async execute(interaction) {
-        const player = interaction.client.kazagumo.players.get(interaction.guild.id);
-        
+    async execute(context) {
+        const player = context.client.kazagumo.players.get(context.guild.id);
+
         if (!player) {
-            return interaction.reply({ embeds: [errorEmbed('No music is currently playing!')] });
+            return context.reply({ embeds: [errorEmbed('No music is currently playing!')] });
         }
 
-        const mode = interaction.options.getString('mode');
-        
+        const mode = context.options.getString('mode');
+
         switch(mode) {
             case 'track':
                 player.setLoop('track');
-                return interaction.reply({ embeds: [createEmbed({ description: '🔁 Now looping the current track!' })] });
+                return context.reply({ embeds: [createEmbed({ description: '🔁 Now looping the current track!' })] });
             case 'queue':
                 player.setLoop('queue');
-                return interaction.reply({ embeds: [createEmbed({ description: '🔁 Now looping the entire queue!' })] });
+                return context.reply({ embeds: [createEmbed({ description: '🔁 Now looping the entire queue!' })] });
             case 'off':
                 player.setLoop('none');
-                return interaction.reply({ embeds: [createEmbed({ description: '➡️ Loop mode disabled!' })] });
+                return context.reply({ embeds: [createEmbed({ description: '➡️ Loop mode disabled!' })] });
         }
     }
 };
