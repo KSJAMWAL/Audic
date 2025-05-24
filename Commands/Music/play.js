@@ -12,7 +12,7 @@ module.exports = {
                 .setDescription('Song name or URL')
                 .setRequired(true)),
 
-    async execute(context) {
+    async execute(interaction) {
         // Store reference to helpers
         const sendInitialError = async (message) => {
             try {
