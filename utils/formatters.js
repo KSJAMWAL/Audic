@@ -2,7 +2,6 @@ const { createEmbed } = require('./embeds');
 
 const { createCanvas, loadImage } = require('canvas');
 const path = require('path');
-const { createCanvas, loadImage } = require('canvas');
 const { AttachmentBuilder } = require('discord.js');
 
 module.exports = {
