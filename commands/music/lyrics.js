@@ -1,6 +1,6 @@
 const { SlashCommandBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
-const { createEmbed, errorEmbed } = require('../utils/embeds');
-const config = require('../config');
+const { createEmbed, errorEmbed } = require('../../utils/embeds');
+const config = require('../../config');
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 const Genius = require('genius-lyrics');
 
