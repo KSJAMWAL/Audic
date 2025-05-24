@@ -2,7 +2,7 @@ const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Strin
 const { createEmbed, errorEmbed } = require('../utils/embeds');
 const { formatDuration, createProgressBar, createMusicCard } = require('../utils/formatters');
 const { getActiveFilter, getFilterDisplayName, hasActiveFilter } = require('../utils/filters');
-const config = require('../config');
+const config = require('../../config');
 
 module.exports = {
     data: new SlashCommandBuilder()
